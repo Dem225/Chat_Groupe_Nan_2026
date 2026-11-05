@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Chat Group — Messagerie</title>
+
+    <link rel="stylesheet" href="/static/style.css">
+
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <script src="https://unpkg.com/htmx-ext-ws@2.0.2"></script>
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- BARRE LATÉRALE -->
+    <aside class="sidebar">
+
+        <div class="brand">
+            <div class="brand-icon">C</div>
+            <div>
+                <h1>Chat Group</h1>
+                <span>Votre espace de discussion</span>
+            </div>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="section-heading">
+                <span>VOS ESPACES</span>
+                <span class="section-count">{{ groups|length }}</span>
+            </div>
+
+            <form action="/groups" method="post" class="create-form">
+                <input
+                    type="text"
+                    name="name"
+                    placeholder="Nom du nouveau groupe..."
+                    maxlength="100"
+                    required
+                >
+                <button type="submit" aria-label="Créer un groupe">+</button>
+            </form>
+
+            <div class="groups-list">
+
+                {% for group in groups %}
+                    <a
+                        href="/groups/{{ group.id }}/view"
+                        hx-get="/groups/{{ group.id }}/view"
+                        hx-target="#chat-panel"
+                        hx-swap="innerHTML"
+                        class="group-item"
+                    >
+                        <span class="group-icon">#</span>
+                        <span class="group-name">{{ group.name }}</span>
+                        <span class="group-arrow">›</span>
+                    </a>
+                {% else %}
+                    <div class="no-groups">
+                        <span class="no-groups-icon">＋</span>
+                        <p>Aucun groupe pour le moment.</p>
+                        <small>Crée ton premier espace de discussion.</small>
+                    </div>
+                {% endfor %}
+
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="profile-avatar">U</div>
+            <div class="profile-info">
+                <strong>Utilisateur</strong>
+                <span>Connecté à Chat Group</span>
+            </div>
+            <span class="online-dot"></span>
+        </div>
+
+    </aside>
+
+
+    <!-- CONTENU PRINCIPAL -->
+    <main class="main-content" id="chat-panel">
+
+        <div class="welcome-screen">
+
+            <div class="welcome-icon">
+                <span>✉</span>
+            </div>
+
+            <span class="eyebrow">BIENVENUE SUR CHAT GROUP</span>
+
+            <h2>Les conversations<br>commencent ici.</h2>
+
+            <p>
+                Sélectionne un groupe dans la barre latérale
+                ou crée ton propre espace pour commencer à discuter.
+            </p>
+
+            <div class="welcome-tip">
+                <span>✦</span>
+                Les messages sont échangés en temps réel.
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+</body>
+</html>

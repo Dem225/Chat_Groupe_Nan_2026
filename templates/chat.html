@@ -1,0 +1,102 @@
+<section class="chat-room" hx-ext="ws" ws-connect="/ws/{{ group.id }}">
+
+    <!-- EN-TÊTE DU GROUPE -->
+    <header class="chat-header">
+
+        <div class="chat-heading">
+            <div class="chat-group-icon">#</div>
+
+            <div>
+                <h2>{{ group.name }}</h2>
+                <span class="chat-subtitle">
+                    Espace de discussion
+                </span>
+            </div>
+        </div>
+
+        <div class="connection-status">
+            <span class="online-dot"></span>
+            Temps réel
+        </div>
+
+    </header>
+
+
+    <!-- MESSAGES -->
+    <div id="messages" class="messages">
+
+        <div class="date-separator">
+            <span>CONVERSATION</span>
+        </div>
+
+        {% for message in messages %}
+
+            <article class="message {% if message.username == user.username %}message-own{% else %}message-received{% endif %}">
+
+                <div class="message-avatar">
+                    {{ message.username[0]|upper }}
+                </div>
+
+                <div class="message-content">
+                    <div class="message-meta">
+                        <strong>{{ message.username }}</strong>
+                        <small>
+                            {{ message.created_at.strftime("%d/%m/%Y à %H:%M") }}
+                        </small>
+                    </div>
+
+                    <div class="message-bubble">
+                        {{ message.content }}
+                    </div>
+                </div>
+
+            </article>
+
+        {% else %}
+
+            <div class="empty-chat" id="empty-chat">
+                <div class="empty-chat-icon">✉</div>
+                <h3>La conversation est vide</h3>
+                <p>Sois le premier à envoyer un message !</p>
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+
+    <!-- FORMULAIRE D'ENVOI -->
+    <div class="composer-area">
+
+        <form class="message-form" ws-send>
+            <input
+                type="text"
+                name="content"
+                placeholder="Écris ton message ici..."
+                autocomplete="off"
+                maxlength="4000"
+                required
+                autofocus
+            >
+
+            <button type="submit">
+                <span>Envoyer</span>
+                <span class="send-icon">➤</span>
+            </button>
+        </form>
+
+        <p class="composer-hint">
+            Appuie sur le bouton pour envoyer ton message.
+        </p>
+
+    </div>
+<script>
+    document.body.addEventListener("htmx:wsAfterSend", function(event) {
+        const form = document.querySelector(".message-form");
+
+        if (form) {
+            form.querySelector('input[name="content"]').value = "";
+        }
+    });
+</script>
+</section>

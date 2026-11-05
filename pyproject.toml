@@ -1,0 +1,25 @@
+[project]
+name = "chat-group-nan-2"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Zebi lobognon", email = "zebilobognon@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "aiosqlite>=0.22.1",
+    "fastapi[standard]>=0.143.0",
+    "itsdangerous>=2.2.0",
+    "pwdlib[argon2]>=0.3.1",
+    "python-multipart>=0.0.32",
+    "sqlalchemy[asyncio]>=2.1.8",
+    "websockets>=17.2",
+]
+
+[project.scripts]
+chat-group-nan-2 = "chat_group_nan_2:main"
+
+[build-system]
+requires = ["uv_build>=0.12.14,<0.13.0"]
+build-backend = "uv_build"

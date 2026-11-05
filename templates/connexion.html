@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion | Chat Group</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body class="auth-page">
+
+    <main class="auth-container">
+
+        <div class="auth-brand">
+            <div class="brand-icon">C</div>
+            <h1>Chat Group</h1>
+            <p>Votre espace de discussion.</p>
+        </div>
+
+        <section class="auth-card">
+
+            <span class="auth-label">BIENVENUE</span>
+
+            <h2>Content de te revoir.</h2>
+            <p class="auth-description">
+                Connecte-toi pour retrouver tes groupes et tes conversations.
+            </p>
+
+            {% if error %}
+                <div class="auth-error">{{ error }}</div>
+            {% endif %}
+
+            <form action="/connexion" method="post" class="auth-form">
+
+                <label for="email">Adresse email</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="exemple@email.com"
+                    required
+                >
+
+                <label for="password">Mot de passe</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Ton mot de passe"
+                    required
+                >
+
+                <button type="submit">Se connecter →</button>
+
+            </form>
+
+            <div class="auth-footer">
+                Tu n'as pas encore de compte ?
+                <a href="/inscription">Créer un compte</a>
+            </div>
+
+        </section>
+
+        <p class="auth-copyright">CHAT GROUP © 2026</p>
+
+    </main>
+
+</body>
+</html>
