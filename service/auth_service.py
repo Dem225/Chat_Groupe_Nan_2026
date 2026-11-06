@@ -1,15 +1,20 @@
-from sqlalchemy import select
+from datetime import datetime, timedelta
+import secrets
+
+from sqlalchemy import select, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from pwdlib import PasswordHash
+from email_validator import validate_email, EmailNotValidError
 
-from models import User
+from models import User, PendingRegistration
+from service.email_service import send_verification_email
 
 
 password_hash = PasswordHash.recommended()
 
 
-# Inscription
-async def register_user(
+# Démarrer une inscription
+async def start_registration(
     db: AsyncSession,
     username: str,
     email: str,
@@ -21,25 +26,126 @@ async def register_user(
     if not username or not email or not password:
         raise ValueError("Tous les champs sont obligatoires")
 
+    try:
+        email_info = validate_email(
+            email,
+            check_deliverability=True
+        )
+        email = email_info.normalized
+
+    except EmailNotValidError:
+        raise ValueError("Adresse email invalide")
+
     if len(password) < 8:
-        raise ValueError("Le mot de passe doit contenir au moins 8 caractères")
+        raise ValueError(
+            "Le mot de passe doit contenir au moins 8 caractères"
+        )
 
     result = await db.execute(
         select(User).where(
-            (User.email == email) | (User.username == username)
+            or_(
+                User.email == email,
+                User.username == username
+            )
         )
     )
 
     if result.scalar_one_or_none():
-        raise ValueError("Cet email ou ce nom d'utilisateur existe déjà")
+        raise ValueError(
+            "Cet email ou ce nom d'utilisateur existe déjà"
+        )
 
-    user = User(
+    # Supprimer une ancienne inscription en attente
+    result = await db.execute(
+        select(PendingRegistration).where(
+            or_(
+                PendingRegistration.email == email,
+                PendingRegistration.username == username
+            )
+        )
+    )
+
+    for pending in result.scalars().all():
+        await db.delete(pending)
+
+    # Générer un code à 6 chiffres
+    code = f"{secrets.randbelow(1_000_000):06d}"
+
+    pending = PendingRegistration(
         username=username,
         email=email,
-        hashed_password=password_hash.hash(password)
+        hashed_password=password_hash.hash(password),
+        verification_code_hash=password_hash.hash(code),
+        expires_at=datetime.utcnow() + timedelta(minutes=10),
+        attempts=0
+    )
+
+    # Envoyer le code
+    try:
+        await send_verification_email(email, code)
+
+        db.add(pending)
+        await db.commit()
+
+    except Exception:
+        await db.rollback()
+        raise
+
+    return email
+
+
+# Vérifier le code et créer le compte
+async def verify_registration(
+    db: AsyncSession,
+    email: str,
+    code: str
+):
+    email = email.strip().lower()
+    code = code.strip()
+
+    result = await db.execute(
+        select(PendingRegistration).where(
+            PendingRegistration.email == email
+        )
+    )
+
+    pending = result.scalar_one_or_none()
+
+    if not pending:
+        raise ValueError("Aucune inscription en attente")
+
+    if pending.expires_at < datetime.utcnow():
+        await db.delete(pending)
+        await db.commit()
+        raise ValueError("Le code a expiré. Recommencez l'inscription.")
+
+    if pending.attempts >= 5:
+        await db.delete(pending)
+        await db.commit()
+        raise ValueError("Nombre maximum de tentatives atteint")
+
+    if not code.isdigit() or len(code) != 6:
+        pending.attempts += 1
+        await db.commit()
+        raise ValueError("Code de confirmation incorrect")
+
+    if not password_hash.verify(
+        code,
+        pending.verification_code_hash
+    ):
+        pending.attempts += 1
+        await db.commit()
+        raise ValueError("Code de confirmation incorrect")
+
+    user = User(
+        username=pending.username,
+        email=pending.email,
+        hashed_password=pending.hashed_password
     )
 
     db.add(user)
+    await db.delete(pending)
+
     await db.commit()
     await db.refresh(user)
 
@@ -53,7 +159,9 @@ async def authenticate_user(
     password: str
 ):
     result = await db.execute(
-        select(User).where(User.email == email.strip().lower())
+        select(User).where(
+            User.email == email.strip().lower()
+        )
     )
 
     user = result.scalar_one_or_none()
@@ -61,12 +169,18 @@ async def authenticate_user(
     if not user:
         return None
 
-    if not password_hash.verify(password, user.hashed_password):
+    if not password_hash.verify(
+        password,
+        user.hashed_password
+    ):
         return None
 
     return user
 
 
 # Récupérer un utilisateur
-async def get_user_by_id(db: AsyncSession, user_id: int):
+async def get_user_by_id(
+    db: AsyncSession,
+    user_id: int
+):
     return await db.get(User, user_id)

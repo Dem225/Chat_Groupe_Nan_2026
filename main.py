@@ -14,6 +14,15 @@ from routes.group_routes import router as group_router
 from routes.chat_routes import router as chat_router
 from routes.upload_routes import router as upload_router
 
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
+
+
+
+
 
 # =====================================
 # CRÉATION DES DOSSIERS

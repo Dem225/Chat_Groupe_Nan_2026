@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vérification | Chat Group</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body class="auth-page">
+
+    <main class="auth-container">
+
+        <div class="auth-brand">
+            <div class="brand-icon">C</div>
+            <h1>Chat Group</h1>
+            <p>Encore une petite étape.</p>
+        </div>
+
+        <section class="auth-card">
+
+            <span class="auth-label">VÉRIFICATION EMAIL</span>
+
+            <h2>Confirme ton adresse.</h2>
+
+            <p class="auth-description">
+                Nous avons envoyé un code de confirmation à :
+                <strong>{{ email }}</strong>
+            </p>
+
+            {% if error %}
+                <div class="auth-error">{{ error }}</div>
+            {% endif %}
+
+            <form action="/verification" method="post" class="auth-form">
+
+                <label for="code">Code de confirmation</label>
+
+                <input
+                    type="text"
+                    id="code"
+                    name="code"
+                    placeholder="000000"
+                    maxlength="6"
+                    minlength="6"
+                    pattern="[0-9]{6}"
+                    inputmode="numeric"
+                    autocomplete="one-time-code"
+                    required
+                >
+
+                <button type="submit">
+                    Vérifier mon compte →
+                </button>
+
+            </form>
+
+            <div class="auth-footer">
+                <a href="/inscription">Recommencer l'inscription</a>
+            </div>
+
+        </section>
+
+        <p class="auth-copyright">CHAT GROUP © 2026</p>
+
+    </main>
+
+</body>
+</html>

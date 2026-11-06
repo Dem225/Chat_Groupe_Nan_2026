@@ -47,4 +47,7 @@ Thumbs.db
 *.tmp
 .bak
 # Images envoyées par les utilisateurs
-uploads/
+uploads
+
+Pkg.
+.env.*

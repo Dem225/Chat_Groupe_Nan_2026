@@ -1,8 +1,6 @@
-
-from fastapi import APIRouter, Request, Form
+from fastapi import APIRouter, Request, Form, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import Depends
 
 from database import get_db
 from core.templates import templates
@@ -42,11 +40,77 @@ async def inscription(
     db: AsyncSession = Depends(get_db),
 ):
     try:
-        user = await auth_service.register_user(
+        email = await auth_service.start_registration(
             db,
             username,
             email,
             password,
+        )
+
+        request.session["pending_email"] = email
+
+        return RedirectResponse(
+            "/verification",
+            status_code=303
+        )
+
+    except ValueError as error:
+        return templates.TemplateResponse(
+            request=request,
+            name="inscription.html",
+            context={"error": str(error)},
+            status_code=400,
+        )
+
+
+# ==============================
+# PAGE DE VERIFICATION
+# ==============================
+
+@router.get("/verification", response_class=HTMLResponse)
+async def verification_page(request: Request):
+
+    email = request.session.get("pending_email")
+
+    if not email:
+        return RedirectResponse(
+            "/inscription",
+            status_code=303
+        )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="verification.html",
+        context={
+            "email": email,
+            "error": None,
+        },
+    )
+
+
+# ==============================
+# VERIFIER LE CODE
+# ==============================
+
+@router.post("/verification", response_class=HTMLResponse)
+async def verification(
+    request: Request,
+    code: str = Form(...),
+    db: AsyncSession = Depends(get_db),
+):
+    email = request.session.get("pending_email")
+
+    if not email:
+        return RedirectResponse(
+            "/inscription",
+            status_code=303
+        )
+
+    try:
+        user = await auth_service.verify_registration(
+            db,
+            email,
+            code,
         )
 
         request.session.clear()
@@ -57,8 +121,11 @@ async def inscription(
     except ValueError as error:
         return templates.TemplateResponse(
             request=request,
-            name="inscription.html",
-            context={"error": str(error)},
+            name="verification.html",
+            context={
+                "email": email,
+                "error": str(error),
+            },
             status_code=400,
         )
 
@@ -114,7 +181,7 @@ async def connexion(
 
 
 # ==============================
-# DÉCONNEXION
+# DECONNEXION
 # ==============================
 
 @router.post("/deconnexion")
