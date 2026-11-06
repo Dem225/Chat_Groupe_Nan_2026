@@ -66,7 +66,6 @@ async def inscription(
 # ==============================
 # PAGE DE VERIFICATION
 # ==============================
-
 @router.get("/verification", response_class=HTMLResponse)
 async def verification_page(request: Request):
 
@@ -84,9 +83,9 @@ async def verification_page(request: Request):
         context={
             "email": email,
             "error": None,
+            "success": request.session.pop("verification_success", None),
         },
     )
-
 
 # ==============================
 # VERIFIER LE CODE
@@ -130,6 +129,107 @@ async def verification(
         )
 
 
+
+
+# ==============================
+# RENVOYER LE CODE DE VERIFICATION
+# ==============================
+
+@router.post("/renvoyer-code", response_class=HTMLResponse)
+async def renvoyer_code(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    email = request.session.get("pending_email")
+
+    if not email:
+        return RedirectResponse(
+            "/inscription",
+            status_code=303
+        )
+
+    try:
+        await auth_service.resend_verification_code(
+            db,
+            email
+        )
+
+        return templates.TemplateResponse(
+            request=request,
+            name="verification.html",
+            context={
+                "email": email,
+                "error": None,
+                "success": "Un nouveau code a été envoyé à votre adresse email."
+            }
+        )
+
+    except ValueError as error:
+        return templates.TemplateResponse(
+            request=request,
+            name="verification.html",
+            context={
+                "email": email,
+                "error": str(error),
+                "success": None
+            },
+            status_code=400
+        )
+
+# ==============================
+# PAGE DE RECUPERATION DU CODE
+# ==============================
+
+@router.get("/demander-code", response_class=HTMLResponse)
+async def demander_code_page(request: Request):
+
+    return templates.TemplateResponse(
+        request=request,
+        name="demander_code.html",
+        context={
+            "error": None,
+            "success": None
+        }
+    )
+
+
+# ==============================
+# TRAITEMENT DE LA RECUPERATION
+# ==============================
+@router.post("/demander-code", response_class=HTMLResponse)
+async def demander_code(
+    request: Request,
+    email: str = Form(...),
+    db: AsyncSession = Depends(get_db),
+):
+    try:
+        await auth_service.resend_verification_code(db, email)
+
+        request.session["pending_email"] = email.strip().lower()
+
+        request.session["verification_success"] = (
+            "Un nouveau code a été envoyé à votre adresse email."
+        )
+
+        return RedirectResponse(
+            "/verification",
+            status_code=303
+        )
+
+    except ValueError as error:
+        return templates.TemplateResponse(
+            request=request,
+            name="demander_code.html",
+            context={
+                "error": str(error),
+                "success": None
+            },
+            status_code=400
+        )
+
+
+
+
 # ==============================
 # PAGE DE CONNEXION
 # ==============================
@@ -137,13 +237,10 @@ async def verification(
 @router.get("/connexion", response_class=HTMLResponse)
 async def connexion_page(request: Request):
 
-    if request.session.get("user_id"):
-        return RedirectResponse("/", status_code=303)
-
     return templates.TemplateResponse(
         request=request,
         name="connexion.html",
-        context={"error": None},
+        context={"error": None}
     )
 
 
@@ -158,26 +255,28 @@ async def connexion(
     password: str = Form(...),
     db: AsyncSession = Depends(get_db),
 ):
-    user = await auth_service.authenticate_user(
-        db,
-        email,
-        password,
-    )
+    try:
+        user = await auth_service.authenticate_user(
+            db,
+            email,
+            password
+        )
 
-    if user is None:
+        if not user:
+            raise ValueError("Email ou mot de passe incorrect.")
+
+        request.session.clear()
+        request.session["user_id"] = user.id
+
+        return RedirectResponse("/", status_code=303)
+
+    except ValueError as error:
         return templates.TemplateResponse(
             request=request,
             name="connexion.html",
-            context={
-                "error": "Email ou mot de passe incorrect."
-            },
-            status_code=401,
+            context={"error": str(error)},
+            status_code=400
         )
-
-    request.session.clear()
-    request.session["user_id"] = user.id
-
-    return RedirectResponse("/", status_code=303)
 
 
 # ==============================
@@ -186,7 +285,9 @@ async def connexion(
 
 @router.post("/deconnexion")
 async def deconnexion(request: Request):
-
     request.session.clear()
 
-    return RedirectResponse("/connexion", status_code=303)
+    return RedirectResponse(
+        "/connexion",
+        status_code=303
+    )

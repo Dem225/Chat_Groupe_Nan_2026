@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Récupérer mon code | Chat Group</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body class="auth-page">
+
+    <main class="auth-container">
+
+        <div class="auth-brand">
+            <div class="brand-icon">C</div>
+            <h1>Chat Group</h1>
+            <p>Retrouvons ton code de vérification.</p>
+        </div>
+
+        <section class="auth-card">
+
+            <span class="auth-label">RÉCUPÉRATION DU CODE</span>
+
+            <h2>Tu as perdu ton code ?</h2>
+
+            <p class="auth-description">
+                Saisis l'adresse email utilisée lors de ton inscription.
+                Nous t'enverrons un nouveau code.
+            </p>
+
+            {% if error %}
+                <div class="auth-error">{{ error }}</div>
+            {% endif %}
+
+            {% if success %}
+                <div class="auth-success">{{ success }}</div>
+            {% endif %}
+
+            <form action="/demander-code" method="post" class="auth-form">
+
+                <label for="email">Adresse email</label>
+
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="exemple@email.com"
+                    required
+                >
+
+                <button type="submit">
+                    Recevoir mon code →
+                </button>
+
+            </form>
+
+            <div class="auth-footer">
+                <a href="/connexion">Retour à la connexion</a>
+            </div>
+
+        </section>
+
+        <p class="auth-copyright">CHAT GROUP © 2026</p>
+
+    </main>
+
+</body>
+</html>

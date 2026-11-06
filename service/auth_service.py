@@ -66,7 +66,12 @@ async def start_registration(
     )
 
     for pending in result.scalars().all():
-        await db.delete(pending)
+         await db.delete(pending)
+
+    # Exécuter les suppressions avant la nouvelle insertion
+    await db.flush()
+
+    # Générer un code à 6 chiffres
 
     # Générer un code à 6 chiffres
     code = f"{secrets.randbelow(1_000_000):06d}"
@@ -92,6 +97,48 @@ async def start_registration(
         raise
 
     return email
+
+# Renvoyer un nouveau code de vérification
+async def resend_verification_code(
+    db: AsyncSession,
+    email: str
+):
+    email = email.strip().lower()
+
+    result = await db.execute(
+        select(PendingRegistration).where(
+            PendingRegistration.email == email
+        )
+    )
+
+    pending = result.scalar_one_or_none()
+
+    if not pending:
+        raise ValueError(
+            "Aucune inscription en attente pour cette adresse email."
+        )
+
+    # Générer un nouveau code
+    code = f"{secrets.randbelow(1_000_000):06d}"
+
+    # Remplacer l'ancien code
+    pending.verification_code_hash = password_hash.hash(code)
+
+    # Prolonger sa validité de 10 minutes
+    pending.expires_at = datetime.utcnow() + timedelta(minutes=10)
+
+    # Réinitialiser les tentatives
+    pending.attempts = 0
+
+    try:
+        await send_verification_email(email, code)
+        await db.commit()
+
+    except Exception:
+        await db.rollback()
+        raise
+
+    return True
 
 
 # Vérifier le code et créer le compte

@@ -70,12 +70,20 @@
         </div>
 
         <div class="sidebar-footer">
-            <div class="profile-avatar">U</div>
+            
             <div class="profile-info">
-                <strong>Utilisateur</strong>
+                <strong> {{ user.username }} </strong>
                 <span>Connecté à Chat Group</span>
             </div>
+
             <span class="online-dot"></span>
+
+            <form action="/deconnexion" method="post">
+                <button type="submit" class="logout-button" title="Déconnexion">
+                    <span>↪</span>
+                </button>
+            </form>
+
         </div>
 
     </aside>

@@ -32,6 +32,10 @@
                 <div class="auth-error">{{ error }}</div>
             {% endif %}
 
+            {% if success %}
+                <div class="auth-success">{{ success }}</div>
+            {% endif %}
+
             <form action="/verification" method="post" class="auth-form">
 
                 <label for="code">Code de confirmation</label>
@@ -53,6 +57,12 @@
                     Vérifier mon compte →
                 </button>
 
+            </form>
+
+            <form action="/renvoyer-code" method="post">
+                <button type="submit">
+                    Renvoyer un nouveau code
+                </button>
             </form>
 
             <div class="auth-footer">
