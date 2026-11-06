@@ -1,41 +1,32 @@
-
-import json
 import os
+from pathlib import Path
 from contextlib import asynccontextmanager
 
-from fastapi import (
-    FastAPI,
-    Request,
-    WebSocket,
-    WebSocketDisconnect,
-    Depends,
-    Form,
-    HTTPException,
-)
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.middleware.sessions import SessionMiddleware
 
-from database import Base, engine, SessionLocal, get_db
-from models import User  # Charge les modèles dans les métadonnées SQLAlchemy
-from service import group_service, chat_service, auth_service
+from database import Base, engine
+import models  # Important : enregistre les modèles dans SQLAlchemy
 
-from pathlib import Path 
-from uuid import uuid4
-from io import BytesIO
+from routes.auth_routes import router as auth_router
+from routes.group_routes import router as group_router
+from routes.chat_routes import router as chat_router
+from routes.upload_routes import router as upload_router
 
-from fastapi import UploadFile, File
-from fastapi.responses import Response
-from PIL import Image, UnidentifiedImageError
 
-# --------------------------------------------------
-# CONFIGURATION
-# --------------------------------------------------
+# =====================================
+# CRÉATION DES DOSSIERS
+# =====================================
 
-templates = Jinja2Templates(directory="templates")
+Path("uploads/images").mkdir(parents=True, exist_ok=True)
+Path("uploads/audios").mkdir(parents=True, exist_ok=True)
+Path("static").mkdir(parents=True, exist_ok=True)
 
+
+# =====================================
+# INITIALISATION DE LA BASE DE DONNÉES
+# =====================================
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -45,7 +36,19 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(lifespan=lifespan)
+# =====================================
+# APPLICATION FASTAPI
+# =====================================
+
+app = FastAPI(
+    title="Chat Group NAN",
+    lifespan=lifespan,
+)
+
+
+# =====================================
+# MIDDLEWARE DE SESSION
+# =====================================
 
 app.add_middleware(
     SessionMiddleware,
@@ -54,10 +57,13 @@ app.add_middleware(
         "cle-secrete-de-developpement-a-remplacer",
     ),
     same_site="lax",
-    https_only=False,  # À passer à True en production avec HTTPS
+    https_only=False,
 )
 
-Path("uploads/images").mkdir(parents=True, exist_ok=True)
+
+# =====================================
+# FICHIERS STATIQUES
+# =====================================
 
 app.mount(
     "/uploads",
@@ -65,377 +71,18 @@ app.mount(
     name="uploads",
 )
 
-
-
-
-
-
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
-
-# --------------------------------------------------
-# OUTIL : RÉCUPÉRER L'UTILISATEUR CONNECTÉ
-# --------------------------------------------------
-
-async def get_current_user(request: Request, db: AsyncSession):
-    user_id = request.session.get("user_id")
-
-    if not user_id:
-        return None
-
-    user = await auth_service.get_user_by_id(db, user_id)
-
-    if user is None:
-        request.session.clear()
-
-    return user
-
-
-# --------------------------------------------------
-# INSCRIPTION
-# --------------------------------------------------
-
-@app.get("/inscription", response_class=HTMLResponse)
-async def inscription_page(request: Request):
-    if request.session.get("user_id"):
-        return RedirectResponse("/", status_code=303)
-
-    return templates.TemplateResponse(
-        request=request,
-        name="inscription.html",
-        context={"error": None},
-    )
-
-
-@app.post("/inscription", response_class=HTMLResponse)
-async def inscription(
-    request: Request,
-    username: str = Form(...),
-    email: str = Form(...),
-    password: str = Form(...),
-    db: AsyncSession = Depends(get_db),
-):
-    try:
-        user = await auth_service.register_user(
-            db,
-            username,
-            email,
-            password,
-        )
-
-        request.session.clear()
-        request.session["user_id"] = user.id
-
-        return RedirectResponse("/", status_code=303)
-
-    except ValueError as error:
-        return templates.TemplateResponse(
-            request=request,
-            name="inscription.html",
-            context={"error": str(error)},
-            status_code=400,
-        )
-
-
-# --------------------------------------------------
-# CONNEXION
-# --------------------------------------------------
-
-@app.get("/connexion", response_class=HTMLResponse)
-async def connexion_page(request: Request):
-    if request.session.get("user_id"):
-        return RedirectResponse("/", status_code=303)
-
-    return templates.TemplateResponse(
-        request=request,
-        name="connexion.html",
-        context={"error": None},
-    )
-
-
-@app.post("/connexion", response_class=HTMLResponse)
-async def connexion(
-    request: Request,
-    email: str = Form(...),
-    password: str = Form(...),
-    db: AsyncSession = Depends(get_db),
-):
-    user = await auth_service.authenticate_user(
-        db,
-        email,
-        password,
-    )
-
-    if user is None:
-        return templates.TemplateResponse(
-            request=request,
-            name="connexion.html",
-            context={"error": "Email ou mot de passe incorrect."},
-            status_code=401,
-        )
-
-    request.session.clear()
-    request.session["user_id"] = user.id
-
-    return RedirectResponse("/", status_code=303)
-
-
-# --------------------------------------------------
-# DÉCONNEXION
-# --------------------------------------------------
-
-@app.post("/deconnexion")
-async def deconnexion(request: Request):
-    request.session.clear()
-
-    return RedirectResponse("/connexion", status_code=303)
-
-
-# --------------------------------------------------
-# PAGE D'ACCUEIL : LISTE DES GROUPES
-# --------------------------------------------------
-
-@app.get("/", response_class=HTMLResponse)
-async def accueil(
-    request: Request,
-    db: AsyncSession = Depends(get_db),
-):
-    user = await get_current_user(request, db)
-
-    if user is None:
-        return RedirectResponse("/connexion", status_code=303)
-
-    groups = await group_service.get_groups(db)
-
-    return templates.TemplateResponse(
-        request=request,
-        name="index.html",
-        context={
-            "groups": groups,
-            "user": user,
-        },
-    )
-
-
-# --------------------------------------------------
-# CRÉER UN GROUPE
-# --------------------------------------------------
-
-@app.post("/groups")
-async def create_group(
-    request: Request,
-    name: str = Form(...),
-    db: AsyncSession = Depends(get_db),
-):
-    user = await get_current_user(request, db)
-
-    if user is None:
-        return RedirectResponse("/connexion", status_code=303)
-
-    try:
-        await group_service.create_group(db, name)
-
-    except ValueError as error:
-        raise HTTPException(
-            status_code=400,
-            detail=str(error),
-        )
-
-    return RedirectResponse("/", status_code=303)
-
-
-# --------------------------------------------------
-# AFFICHER UN GROUPE
-# --------------------------------------------------
-
-@app.get("/groups/{group_id}/view", response_class=HTMLResponse)
-async def group_view(
-    request: Request,
-    group_id: int,
-    db: AsyncSession = Depends(get_db),
-):
-    user = await get_current_user(request, db)
-
-    if user is None:
-        return RedirectResponse("/connexion", status_code=303)
-
-    group = await group_service.get_group(db, group_id)
-
-    if group is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Groupe introuvable",
-        )
-
-    messages = await group_service.get_group_messages(db, group_id)
-
-    return templates.TemplateResponse(
-        request=request,
-        name="chat.html",
-        context={
-            "group": group,
-            "messages": messages,
-            "user": user,
-        },
-    )
-
-
-# --------------------------------------------------
-# WEBSOCKET : DISCUSSION EN TEMPS RÉEL
-# --------------------------------------------------
-
-@app.websocket("/ws/{group_id}")
-async def websocket_chat(
-    websocket: WebSocket,
-    group_id: int,
-):
-    # Vérifier la session de l'utilisateur
-    user_id = websocket.scope.get("session", {}).get("user_id")
-
-    if not user_id:
-        await websocket.close(code=1008)
-        return
-
-    # Vérifier que l'utilisateur et le groupe existent
-    async with SessionLocal() as db:
-        user = await auth_service.get_user_by_id(db, user_id)
-        group = await group_service.get_group(db, group_id)
-
-    if user is None or group is None:
-        await websocket.close(code=1008)
-        return
-
-    # Le nom vient du compte connecté, jamais du formulaire
-    username = user.username
-
-    await chat_service.manager.connect(websocket, group_id)
-
-    try:
-        while True:
-            data = json.loads(await websocket.receive_text())
-
-            content = str(data.get("content", "")).strip()[:4000]
-
-            if not content:
-                continue
-
-            message = await chat_service.save_message(
-                group_id,
-                username,
-                content,
-            )
-
-            html = templates.get_template(
-                    "message.html"
-                ).render(
-                    message=message,
-                    current_username=username
-                )
-
-            await chat_service.manager.broadcast(
-                group_id,
-                html,
-            )
-
-    except WebSocketDisconnect:
-        pass
-
-    finally:
-        chat_service.manager.disconnect(websocket, group_id)
-
-
-
-
-# --------------------------------------------------
-# ENVOYER UNE IMAGE DANS UN GROUPE
-# --------------------------------------------------
-
-@app.post("/groups/{group_id}/images")
-async def upload_group_image(
-    request: Request,
-    group_id: int,
-    image: UploadFile = File(...),
-    db: AsyncSession = Depends(get_db),
-):
-    # Vérifier l'utilisateur connecté
-    user = await get_current_user(request, db)
-
-    if user is None:
-        raise HTTPException(
-            status_code=401,
-            detail="Vous devez être connecté.",
-        )
-
-    # Vérifier le groupe
-    group = await group_service.get_group(db, group_id)
-
-    if group is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Groupe introuvable.",
-        )
-
-    # Limite : 5 Mo
-    max_size = 5 * 1024 * 1024
-    contents = await image.read(max_size + 1)
-
-    if len(contents) > max_size:
-        raise HTTPException(
-            status_code=413,
-            detail="L'image ne doit pas dépasser 5 Mo.",
-        )
-
-    # Vérifier le véritable format de l'image
-    try:
-        with Image.open(BytesIO(contents)) as img:
-            img.verify()
-            image_format = img.format
-
-    except (UnidentifiedImageError, OSError, Image.DecompressionBombError):
-        raise HTTPException(
-            status_code=400,
-            detail="Le fichier envoyé n'est pas une image valide.",
-        )
-
-    extensions = {
-        "JPEG": ".jpg",
-        "PNG": ".png",
-        "WEBP": ".webp",
-    }
-
-    if image_format not in extensions:
-        raise HTTPException(
-            status_code=400,
-            detail="Formats acceptés : JPG, PNG et WEBP.",
-        )
-
-    # Créer un nom de fichier unique
-    filename = f"{uuid4().hex}{extensions[image_format]}"
-
-    destination = Path("uploads/images") / filename
-    destination.write_bytes(contents)
-
-    image_path = f"/uploads/images/{filename}"
-
-    # Enregistrer le message dans la base
-    message = await chat_service.save_image_message(
-        group_id,
-        user.username,
-        image_path,
-    )
-
-    # Préparer le HTML
-    html = templates.get_template(
-        "message.html"
-    ).render(
-        message=message,
-        current_username=user.username,
-    )
-
-    # Diffuser l'image aux membres connectés
-    await chat_service.manager.broadcast(
-        group_id,
-        html,
-    )
-
-    return Response(status_code=204)
+app.mount(
+    "/static",
+    StaticFiles(directory="static"),
+    name="static",
+)
+
+
+# =====================================
+# INCLURE LES ROUTES
+# =====================================
+
+app.include_router(auth_router)
+app.include_router(group_router)
+app.include_router(chat_router)
+app.include_router(upload_router)

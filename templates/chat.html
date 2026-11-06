@@ -1,9 +1,8 @@
-
+HTML
 <section class="chat-room" hx-ext="ws" ws-connect="/ws/{{ group.id }}">
 
     <!-- EN-TÊTE DU GROUPE -->
     <header class="chat-header">
-
         <div class="chat-heading">
             <div class="chat-group-icon">#</div>
 
@@ -17,7 +16,6 @@
             <span class="online-dot"></span>
             Temps réel
         </div>
-
     </header>
 
 
@@ -46,6 +44,7 @@
                     </div>
 
                     {% if message.image_path %}
+
                         <div class="message-bubble image-bubble">
                             <img
                                 src="{{ message.image_path }}"
@@ -53,14 +52,25 @@
                                 class="chat-image"
                             >
                         </div>
+
+                    {% elif message.audio_path %}
+
+                        <div class="message-bubble audio-bubble">
+                            <audio controls preload="metadata">
+                                <source src="{{ message.audio_path }}">
+                                Votre navigateur ne supporte pas la lecture audio.
+                            </audio>
+                        </div>
+
                     {% else %}
+
                         <div class="message-bubble">
                             {{ message.content }}
                         </div>
+
                     {% endif %}
 
                 </div>
-
             </article>
 
         {% else %}
@@ -106,6 +116,42 @@
         </form>
 
 
+        <!-- ENREGISTREMENT VOCAL -->
+        <div class="audio-recorder">
+
+            <button
+                type="button"
+                id="record-button"
+                class="record-button"
+            >
+                🎙 Enregistrer un vocal
+            </button>
+
+            <button
+                type="button"
+                id="stop-button"
+                class="stop-button"
+                disabled
+            >
+                ■ Arrêter
+            </button>
+
+            <button
+                type="button"
+                id="cancel-button"
+                class="cancel-button"
+                disabled
+            >
+                ✕ Annuler
+            </button>
+
+            <p id="recording-status" class="composer-hint">
+                Appuie sur le microphone pour enregistrer.
+            </p>
+
+        </div>
+
+
         <!-- ENVOI DE MESSAGE TEXTE -->
         <form class="message-form" ws-send>
 
@@ -133,15 +179,250 @@
     </div>
 
 
-    <!-- VIDAGE DU CHAMP TEXTE APRÈS ENVOI -->
+    <!-- JAVASCRIPT -->
     <script>
-        document.body.addEventListener("htmx:wsAfterSend", function(event) {
+
+        // Vider le champ texte après envoi
+        document.body.addEventListener("htmx:wsAfterSend", function () {
+
             const form = document.querySelector(".message-form");
 
             if (form) {
                 form.querySelector('input[name="content"]').value = "";
             }
+
         });
+
+
+        // ==================================
+        // ENREGISTREMENT DES MESSAGES VOCAUX
+        // ==================================
+
+        const recordButton = document.getElementById("record-button");
+        const stopButton = document.getElementById("stop-button");
+        const cancelButton = document.getElementById("cancel-button");
+        const recordingStatus = document.getElementById("recording-status");
+
+        const groupId = {{ group.id | tojson }};
+
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let audioStream = null;
+        let sendRecording = false;
+
+
+        // Choisir un format compatible avec le navigateur
+        function getSupportedAudioType() {
+
+            const formats = [
+                "audio/webm;codecs=opus",
+                "audio/ogg;codecs=opus",
+                "audio/mp4",
+                "audio/webm",
+                "audio/ogg"
+            ];
+
+            for (const format of formats) {
+
+                if (MediaRecorder.isTypeSupported(format)) {
+                    return format;
+                }
+
+            }
+
+            return "";
+
+        }
+
+
+        // Arrêter les pistes du microphone
+        function releaseMicrophone() {
+
+            if (audioStream) {
+
+                audioStream.getTracks().forEach(track => {
+                    track.stop();
+                });
+
+                audioStream = null;
+            }
+
+        }
+
+
+        // Démarrer l'enregistrement
+        recordButton.addEventListener("click", async function () {
+
+            try {
+
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    throw new Error("Ton navigateur ne permet pas l'accès au microphone.");
+                }
+
+                if (!window.MediaRecorder) {
+                    throw new Error("Ton navigateur ne supporte pas l'enregistrement vocal.");
+                }
+
+                audioStream = await navigator.mediaDevices.getUserMedia({
+                    audio: true
+                });
+
+                const mimeType = getSupportedAudioType();
+
+                mediaRecorder = mimeType
+                    ? new MediaRecorder(audioStream, { mimeType })
+                    : new MediaRecorder(audioStream);
+
+                audioChunks = [];
+                sendRecording = false;
+
+                mediaRecorder.ondataavailable = function (event) {
+
+                    if (event.data && event.data.size > 0) {
+                        audioChunks.push(event.data);
+                    }
+
+                };
+
+
+                // Quand l'enregistrement est terminé
+                mediaRecorder.onstop = async function () {
+
+                    releaseMicrophone();
+
+                    if (sendRecording && audioChunks.length > 0) {
+
+                        const audioBlob = new Blob(
+                            audioChunks,
+                            {
+                                type: mediaRecorder.mimeType || "audio/webm"
+                            }
+                        );
+
+                        await sendAudio(audioBlob);
+
+                    }
+
+                    audioChunks = [];
+                    mediaRecorder = null;
+
+                    recordButton.disabled = false;
+                    stopButton.disabled = true;
+                    cancelButton.disabled = true;
+
+                };
+
+
+                mediaRecorder.start();
+
+                recordButton.disabled = true;
+                stopButton.disabled = false;
+                cancelButton.disabled = false;
+
+                recordingStatus.textContent = "🔴 Enregistrement en cours...";
+
+
+            } catch (error) {
+
+                recordingStatus.textContent = error.message || "Impossible d'accéder au microphone.";
+
+                releaseMicrophone();
+
+            }
+
+        });
+
+
+        // Arrêter et envoyer le vocal
+        stopButton.addEventListener("click", function () {
+
+            if (mediaRecorder && mediaRecorder.state === "recording") {
+
+                sendRecording = true;
+
+                recordingStatus.textContent = "Préparation et envoi du vocal...";
+
+                mediaRecorder.stop();
+
+            }
+
+        });
+
+
+        // Annuler l'enregistrement
+        cancelButton.addEventListener("click", function () {
+
+            if (mediaRecorder && mediaRecorder.state === "recording") {
+
+                sendRecording = false;
+
+                mediaRecorder.stop();
+
+                recordingStatus.textContent = "Enregistrement annulé.";
+
+            }
+
+        });
+
+
+        // Envoyer le fichier audio à FastAPI
+        async function sendAudio(audioBlob) {
+
+            try {
+
+                if (audioBlob.size === 0) {
+                    throw new Error("L'enregistrement est vide.");
+                }
+
+                if (audioBlob.size > 10 * 1024 * 1024) {
+                    throw new Error("Le vocal dépasse la limite de 10 Mo.");
+                }
+
+                let extension = ".webm";
+
+                if (audioBlob.type.includes("ogg")) {
+                    extension = ".ogg";
+                } else if (audioBlob.type.includes("mp4")) {
+                    extension = ".mp4";
+                }
+
+                const formData = new FormData();
+
+                formData.append(
+                    "audio",
+                    audioBlob,
+                    "vocal" + extension
+                );
+
+                const response = await fetch(
+                    `/groups/${groupId}/audios`,
+                    {
+                        method: "POST",
+                        body: formData,
+                        credentials: "same-origin"
+                    }
+                );
+
+                if (!response.ok) {
+
+                    const result = await response.json().catch(() => ({}));
+
+                    throw new Error(
+                        result.detail || "Erreur lors de l'envoi du vocal."
+                    );
+
+                }
+
+                recordingStatus.textContent = "✓ Vocal envoyé avec succès.";
+
+            } catch (error) {
+
+                recordingStatus.textContent = error.message;
+
+            }
+
+        }
+
     </script>
 
 </section>

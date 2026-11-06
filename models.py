@@ -36,3 +36,8 @@ class Message(Base):
         String(500),
         nullable=True
     )
+
+    audio_path: Mapped[str | None] = mapped_column(
+    String(500),
+    nullable=True
+    )
