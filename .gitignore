@@ -45,6 +45,6 @@ Thumbs.db
 
 # Fichiers temporaires
 *.tmp
-*.bak
+.bak
 # Images envoyées par les utilisateurs
 uploads/
