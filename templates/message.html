@@ -9,15 +9,26 @@
         </div>
 
         <div class="message-content">
+
             <div class="message-meta">
                 <strong>{{ message.username }}</strong>
                 <small>{{ message.created_at }}</small>
             </div>
 
-            <div class="message-bubble">
-                {{ message.content }}
-            </div>
-        </div>
+            {% if message.image_path %}
+                <div class="message-bubble image-bubble">
+                    <img
+                        src="{{ message.image_path }}"
+                        alt="Image envoyée par {{ message.username }}"
+                        class="chat-image"
+                    >
+                </div>
+            {% else %}
+                <div class="message-bubble">
+                    {{ message.content }}
+                </div>
+            {% endif %}
 
+        </div>
     </article>
 </div>

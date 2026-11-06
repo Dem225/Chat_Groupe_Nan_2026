@@ -30,7 +30,9 @@ class Message(Base):
     content: Mapped[str] = mapped_column(Text)
     username: Mapped[str] = mapped_column(String(100))
     group_id: Mapped[int] = mapped_column(ForeignKey("chat_groups.id"))
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=datetime.utcnow,
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    image_path: Mapped[str | None] = mapped_column(
+        String(500),
+        nullable=True
     )

@@ -1,3 +1,4 @@
+
 <section class="chat-room" hx-ext="ws" ws-connect="/ws/{{ group.id }}">
 
     <!-- EN-TÊTE DU GROUPE -->
@@ -8,9 +9,7 @@
 
             <div>
                 <h2>{{ group.name }}</h2>
-                <span class="chat-subtitle">
-                    Espace de discussion
-                </span>
+                <span class="chat-subtitle">Espace de discussion</span>
             </div>
         </div>
 
@@ -38,6 +37,7 @@
                 </div>
 
                 <div class="message-content">
+
                     <div class="message-meta">
                         <strong>{{ message.username }}</strong>
                         <small>
@@ -45,9 +45,20 @@
                         </small>
                     </div>
 
-                    <div class="message-bubble">
-                        {{ message.content }}
-                    </div>
+                    {% if message.image_path %}
+                        <div class="message-bubble image-bubble">
+                            <img
+                                src="{{ message.image_path }}"
+                                alt="Image envoyée par {{ message.username }}"
+                                class="chat-image"
+                            >
+                        </div>
+                    {% else %}
+                        <div class="message-bubble">
+                            {{ message.content }}
+                        </div>
+                    {% endif %}
+
                 </div>
 
             </article>
@@ -65,10 +76,39 @@
     </div>
 
 
-    <!-- FORMULAIRE D'ENVOI -->
+    <!-- ZONE D'ENVOI -->
     <div class="composer-area">
 
+        <!-- ENVOI D'IMAGE -->
+        <form
+            class="image-upload-form"
+            hx-post="/groups/{{ group.id }}/images"
+            hx-encoding="multipart/form-data"
+            hx-swap="none"
+        >
+
+            <label for="image-file" class="image-upload-button">
+                Choisir une image
+            </label>
+
+            <input
+                type="file"
+                id="image-file"
+                name="image"
+                accept="image/jpeg,image/png,image/webp"
+                required
+            >
+
+            <button type="submit">
+                Envoyer l'image
+            </button>
+
+        </form>
+
+
+        <!-- ENVOI DE MESSAGE TEXTE -->
         <form class="message-form" ws-send>
+
             <input
                 type="text"
                 name="content"
@@ -83,6 +123,7 @@
                 <span>Envoyer</span>
                 <span class="send-icon">➤</span>
             </button>
+
         </form>
 
         <p class="composer-hint">
@@ -90,13 +131,17 @@
         </p>
 
     </div>
-<script>
-    document.body.addEventListener("htmx:wsAfterSend", function(event) {
-        const form = document.querySelector(".message-form");
 
-        if (form) {
-            form.querySelector('input[name="content"]').value = "";
-        }
-    });
-</script>
+
+    <!-- VIDAGE DU CHAMP TEXTE APRÈS ENVOI -->
+    <script>
+        document.body.addEventListener("htmx:wsAfterSend", function(event) {
+            const form = document.querySelector(".message-form");
+
+            if (form) {
+                form.querySelector('input[name="content"]').value = "";
+            }
+        });
+    </script>
+
 </section>

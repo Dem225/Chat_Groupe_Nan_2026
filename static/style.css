@@ -947,3 +947,51 @@ input {
     padding: 12px 16px;
     overflow-wrap: anywhere;
 }
+
+
+
+/* Envoi d'images */
+.image-upload-form {
+    display: flex;
+    align-items: center;
+}
+
+.image-upload-form input[type="file"] {
+    display: none;
+}
+
+.image-upload-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 15px;
+    background: #f1f1f1;
+    color: #111;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.image-upload-button:hover {
+    background: #ddd;
+}
+
+/* Images dans la conversation */
+.image-bubble {
+    padding: 5px !important;
+    overflow: hidden;
+}
+
+.chat-image {
+    display: block;
+    width: 100%;
+    max-width: 320px;
+    max-height: 350px;
+    object-fit: contain;
+    border-radius: 10px;
+}
+.image-upload-form input[type="file"] {
+    display: none;
+}

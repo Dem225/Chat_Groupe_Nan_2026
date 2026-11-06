@@ -22,6 +22,13 @@ from database import Base, engine, SessionLocal, get_db
 from models import User  # Charge les modèles dans les métadonnées SQLAlchemy
 from service import group_service, chat_service, auth_service
 
+from pathlib import Path 
+from uuid import uuid4
+from io import BytesIO
+
+from fastapi import UploadFile, File
+from fastapi.responses import Response
+from PIL import Image, UnidentifiedImageError
 
 # --------------------------------------------------
 # CONFIGURATION
@@ -49,6 +56,19 @@ app.add_middleware(
     same_site="lax",
     https_only=False,  # À passer à True en production avec HTTPS
 )
+
+Path("uploads/images").mkdir(parents=True, exist_ok=True)
+
+app.mount(
+    "/uploads",
+    StaticFiles(directory="uploads"),
+    name="uploads",
+)
+
+
+
+
+
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -322,3 +342,100 @@ async def websocket_chat(
 
     finally:
         chat_service.manager.disconnect(websocket, group_id)
+
+
+
+
+# --------------------------------------------------
+# ENVOYER UNE IMAGE DANS UN GROUPE
+# --------------------------------------------------
+
+@app.post("/groups/{group_id}/images")
+async def upload_group_image(
+    request: Request,
+    group_id: int,
+    image: UploadFile = File(...),
+    db: AsyncSession = Depends(get_db),
+):
+    # Vérifier l'utilisateur connecté
+    user = await get_current_user(request, db)
+
+    if user is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Vous devez être connecté.",
+        )
+
+    # Vérifier le groupe
+    group = await group_service.get_group(db, group_id)
+
+    if group is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Groupe introuvable.",
+        )
+
+    # Limite : 5 Mo
+    max_size = 5 * 1024 * 1024
+    contents = await image.read(max_size + 1)
+
+    if len(contents) > max_size:
+        raise HTTPException(
+            status_code=413,
+            detail="L'image ne doit pas dépasser 5 Mo.",
+        )
+
+    # Vérifier le véritable format de l'image
+    try:
+        with Image.open(BytesIO(contents)) as img:
+            img.verify()
+            image_format = img.format
+
+    except (UnidentifiedImageError, OSError, Image.DecompressionBombError):
+        raise HTTPException(
+            status_code=400,
+            detail="Le fichier envoyé n'est pas une image valide.",
+        )
+
+    extensions = {
+        "JPEG": ".jpg",
+        "PNG": ".png",
+        "WEBP": ".webp",
+    }
+
+    if image_format not in extensions:
+        raise HTTPException(
+            status_code=400,
+            detail="Formats acceptés : JPG, PNG et WEBP.",
+        )
+
+    # Créer un nom de fichier unique
+    filename = f"{uuid4().hex}{extensions[image_format]}"
+
+    destination = Path("uploads/images") / filename
+    destination.write_bytes(contents)
+
+    image_path = f"/uploads/images/{filename}"
+
+    # Enregistrer le message dans la base
+    message = await chat_service.save_image_message(
+        group_id,
+        user.username,
+        image_path,
+    )
+
+    # Préparer le HTML
+    html = templates.get_template(
+        "message.html"
+    ).render(
+        message=message,
+        current_username=user.username,
+    )
+
+    # Diffuser l'image aux membres connectés
+    await chat_service.manager.broadcast(
+        group_id,
+        html,
+    )
+
+    return Response(status_code=204)
