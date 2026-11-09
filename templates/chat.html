@@ -455,4 +455,82 @@
 
     </script>
 
+
+    <!-- PANNEAU DROIT : INFORMATIONS DU GROUPE -->
+    <aside class="details-panel" id="details-panel" hx-swap-oob="outerHTML">
+
+        <div class="details-header">
+            <span>INFORMATIONS DU GROUPE</span>
+            <span class="details-icon">ⓘ</span>
+        </div>
+
+        <div class="group-details">
+
+            <div class="details-group-icon">#</div>
+
+            <h3>{{ group.name }}</h3>
+
+            <p>Espace de discussion privé</p>
+
+            <div class="details-stat">
+                <strong>{{ members|length }}</strong>
+                <span>Membre(s)</span>
+            </div>
+
+        </div>
+
+        <div class="members-section">
+
+            <div class="members-heading">
+                <h4>MEMBRES</h4>
+                <span>{{ members|length }}</span>
+            </div>
+
+            <div class="members-list">
+
+                {% for member, membership in members %}
+
+                <div class="member-item">
+
+                    <div class="member-avatar">
+                        {{ member.username[0]|upper }}
+                    </div>
+
+                    <div class="member-info">
+                        <strong>{{ member.username }}</strong>
+
+                        <span>
+                            {% if membership.role == "admin" %}
+                                Administrateur
+                            {% else %}
+                                Membre
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    {% if membership.role == "admin" %}
+                        <span class="admin-badge">ADMIN</span>
+                    {% endif %}
+
+                </div>
+
+                {% else %}
+
+                <p class="no-members">Aucun membre pour le moment.</p>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+        <div class="details-footer">
+            CHAT GROUP
+            <span>Messagerie en temps réel</span>
+        </div>
+
+    </aside>
+
+
+
 </section>

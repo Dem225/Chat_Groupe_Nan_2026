@@ -219,7 +219,20 @@ async def get_pending_invitations(
     return result.all()
 
 
+async def get_group_members(
+    db: AsyncSession,
+    group_id: int
+):
+    result = await db.execute(
+        select(User, GroupMember)
+        .join(GroupMember, User.id == GroupMember.user_id)
+        .where(
+            GroupMember.group_id == group_id,
+            GroupMember.status == "accepted"
+        )
+    )
 
+    return result.all()
 
 
 

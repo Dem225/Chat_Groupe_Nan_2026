@@ -1,0 +1,87 @@
+/* =========================
+   STRUCTURE PRINCIPALE
+========================= */
+
+.app {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+}
+
+/* =========================
+   CONTENU PRINCIPAL
+========================= */
+
+.main-content {
+    flex: 1;
+    min-width: 0;
+    height: 100vh;
+    background: var(--background);
+}
+
+/* =========================
+   ÉCRAN D'ACCUEIL
+========================= */
+
+.welcome-screen {
+    max-width: 550px;
+    margin: auto;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 30px;
+}
+
+.welcome-icon {
+    width: 85px;
+    height: 85px;
+    border-radius: 25px;
+    background: var(--black);
+    color: white;
+    display: grid;
+    place-items: center;
+    font-size: 38px;
+    margin-bottom: 30px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+}
+
+.eyebrow {
+    font-size: 10px;
+    letter-spacing: 2px;
+    font-weight: 800;
+    color: #999;
+    margin-bottom: 18px;
+}
+
+.welcome-screen h2 {
+    font-size: clamp(32px, 4vw, 47px);
+    line-height: 1.15;
+    letter-spacing: -2px;
+    font-weight: 800;
+}
+
+.welcome-screen p {
+    max-width: 370px;
+    color: var(--gray);
+    font-size: 14px;
+    line-height: 1.8;
+    margin-top: 18px;
+}
+
+.welcome-tip {
+    margin-top: 35px;
+    padding: 13px 18px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 30px;
+    color: #666;
+    font-size: 11px;
+}
+
+.welcome-tip span {
+    color: var(--black);
+    margin-right: 5px;
+}

@@ -1,0 +1,352 @@
+/* =========================
+   SIDEBAR
+========================= */
+
+.sidebar {
+    width: 290px;
+    min-width: 290px;
+    background: var(--white);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 30px 20px 18px;
+}
+
+/* Logo */
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 55px;
+}
+
+.brand-icon {
+    width: 43px;
+    height: 43px;
+    background: var(--black);
+    color: white;
+    border-radius: 13px;
+    display: grid;
+    place-items: center;
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.brand h1 {
+    font-size: 19px;
+    font-weight: 800;
+    letter-spacing: -0.7px;
+}
+
+.brand span {
+    display: block;
+    font-size: 11px;
+    color: var(--gray);
+    margin-top: 3px;
+}
+
+/* Groupes */
+
+.sidebar-section {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    color: #999;
+}
+
+.section-count {
+    background: var(--soft);
+    color: var(--black);
+    padding: 4px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+}
+
+/* Création groupe */
+
+.create-form {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 25px;
+}
+
+.create-form input {
+    flex: 1;
+    min-width: 0;
+    height: 43px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 0 12px;
+    outline: none;
+    font-size: 12px;
+    background: #fafafa;
+    transition: 0.2s;
+}
+
+.create-form input:focus {
+    border-color: #777;
+    background: white;
+}
+
+.create-form button {
+    width: 43px;
+    height: 43px;
+    border: none;
+    border-radius: 9px;
+    background: var(--black);
+    color: white;
+    font-size: 23px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.create-form button:hover {
+    background: #444;
+}
+
+/* Liste des groupes */
+
+.groups-list {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.group-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    text-decoration: none;
+    color: #555;
+    border-radius: 9px;
+    transition: 0.2s;
+}
+
+.group-item:hover {
+    background: var(--soft);
+    color: var(--black);
+}
+
+.group-icon {
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    background: #f0f0f0;
+    font-weight: 800;
+    font-size: 17px;
+}
+
+.group-name {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.group-arrow {
+    color: #aaa;
+    font-size: 21px;
+}
+
+/* Aucun groupe */
+
+.no-groups {
+    text-align: center;
+    padding: 25px 10px;
+    color: var(--gray);
+}
+
+.no-groups-icon {
+    font-size: 27px;
+}
+
+.no-groups p {
+    margin: 10px 0 5px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #555;
+}
+
+.no-groups small {
+    font-size: 11px;
+}
+
+/* Profil */
+
+.sidebar-footer {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 15px 5px 5px;
+    border-top: 1px solid var(--border);
+    margin-top: 20px;
+}
+
+.profile-avatar {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--black);
+    color: white;
+    font-weight: 700;
+}
+
+.profile-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.profile-info strong {
+    font-size: 12px;
+}
+
+.profile-info span {
+    font-size: 10px;
+    color: var(--gray);
+}
+
+.online-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #333;
+}
+
+/* =========================
+   INVITATIONS REÇUES
+========================= */
+
+.sidebar-section:has(.group-item form) {
+    flex: initial;
+    margin-bottom: 25px;
+}
+
+.sidebar-section .group-item:has(form) {
+    background: #f7f7f7;
+    border: 1px solid var(--border);
+    margin-bottom: 8px;
+    padding: 10px;
+}
+
+.sidebar-section .group-item:has(form) .group-name {
+    font-size: 12px;
+}
+
+.sidebar-section .group-item form button {
+    padding: 7px 11px;
+    border: none;
+    border-radius: 7px;
+    background: var(--black);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.sidebar-section .group-item form button:hover {
+    background: #444;
+}
+
+
+
+
+
+
+
+
+
+/* =========================
+   RESPONSIVE SIDEBAR
+========================= */
+
+@media (max-width: 750px) {
+    .sidebar {
+        width: 220px;
+        min-width: 220px;
+        padding: 20px 12px;
+    }
+
+    .brand {
+        margin-bottom: 35px;
+    }
+}
+
+@media (max-width: 520px) {
+    .sidebar {
+        width: 105px;
+        min-width: 105px;
+        padding: 15px 8px;
+    }
+
+    .brand {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .brand h1 {
+        font-size: 13px;
+    }
+
+    .brand span {
+        display: none;
+    }
+
+    .section-heading {
+        font-size: 8px;
+        letter-spacing: 0;
+    }
+
+    .create-form {
+        flex-direction: column;
+    }
+
+    .create-form input {
+        width: 100%;
+        font-size: 10px;
+        padding: 8px;
+    }
+
+    .create-form button {
+        width: 100%;
+    }
+
+    .group-item {
+        padding: 9px 5px;
+        gap: 5px;
+    }
+
+    .group-name {
+        font-size: 10px;
+        overflow-wrap: anywhere;
+    }
+
+    .group-arrow {
+        display: none;
+    }
+
+    .profile-info,
+    .sidebar-footer > .online-dot {
+        display: none;
+    }
+
+    .sidebar-footer {
+        justify-content: center;
+    }
+}

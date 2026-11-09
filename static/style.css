@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
 
 @import url("css/base.css");
@@ -8,16 +9,34 @@
 @import url("css/uploads.css");
 @import url("css/auth.css");
 
-.auth-success {
-    background: #e8f7ed;
-    color: #187a3d;
-    border: 1px solid #b7e4c7;
-    padding: 12px;
-    margin-bottom: 15px;
+/* ========================================
+   MESSAGES TEMPORAIRES
+======================================== */
+
+.flash-message {
+    padding: 12px 16px;
+    margin: 12px;
     border-radius: 8px;
-    font-size: 14px;
-    text-align: center;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid var(--border);
 }
+
+.flash-message.error {
+    background: var(--black);
+    color: var(--white);
+    border-color: #777777;
+}
+
+.flash-message.success {
+    background: var(--white);
+    color: var(--black);
+    border-color: var(--black);
+}
+
+/* ========================================
+   DÉCONNEXION
+======================================== */
 
 .logout-button {
     width: 36px;
@@ -26,38 +45,16 @@
     align-items: center;
     justify-content: center;
     background: transparent;
-    color: #ffffff;
-    border: 1px solid #444;
+    color: var(--white);
+    border: 1px solid #444444;
     border-radius: 8px;
     cursor: pointer;
     font-size: 20px;
-    transition: 0.2s ease;
+    transition: var(--transition);
 }
 
 .logout-button:hover {
-    background: #ffffff;
-    color: #000000;
-    border-color: #ffffff;
-}
-
-/* MESSAGES TEMPORAIRES */
-.flash-message {
-    padding: 12px 16px;
-    margin: 12px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 500;
-    border: 1px solid;
-}
-
-.flash-message.error {
-    background: #1c1c1c;
-    color: #ffffff;
-    border-color: #777777;
-}
-
-.flash-message.success {
-    background: #ffffff;
-    color: #111111;
-    border-color: #111111;
+    background: var(--white);
+    color: var(--black);
+    border-color: var(--white);
 }

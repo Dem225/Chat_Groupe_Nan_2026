@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription | Chat Group</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body class="auth-page">
+
+    <main class="auth-container">
+
+        <div class="auth-brand">
+            <div class="brand-icon">C</div>
+            <h1>Chat Group</h1>
+            <p>Rejoins notre communauté.</p>
+        </div>
+
+        <section class="auth-card">
+
+            <span class="auth-label">CRÉER UN COMPTE</span>
+
+            <h2>Rejoins-nous.</h2>
+            <p class="auth-description">
+                Crée ton compte pour commencer à discuter.
+            </p>
+
+            {% if error %}
+                <div class="auth-error">{{ error }}</div>
+            {% endif %}
+
+            <form action="/inscription" method="post" class="auth-form">
+
+                <label for="username">Nom d'utilisateur</label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="Ton nom"
+                    maxlength="100"
+                    required
+                >
+
+                <label for="email">Adresse email</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="exemple@email.com"
+                    required
+                >
+
+                <label for="password">Mot de passe</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="8 caractères minimum"
+                    minlength="8"
+                    required
+                >
+
+                <button type="submit">Créer mon compte →</button>
+
+            </form>
+
+            <div class="auth-footer">
+                Tu as déjà un compte ?
+                <a href="/connexion">Se connecter</a>
+            </div>
+
+        </section>
+
+        <p class="auth-copyright">CHAT GROUP © 2026</p>
+
+    </main>
+
+</body>
+</html>

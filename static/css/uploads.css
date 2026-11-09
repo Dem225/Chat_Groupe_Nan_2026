@@ -1,105 +1,440 @@
-/* =========================
-   ENVOI D'IMAGES
-========================= */
+
+/* ========================================
+   FICHIERS JOINTS ET ENREGISTREMENTS
+======================================== */
+
+/* ZONE DES ACTIONS */
+
+.upload-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.upload-actions button,
+.upload-actions label {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--white);
+    color: var(--black);
+    font-size: 16px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.upload-actions button:hover,
+.upload-actions label:hover {
+    background: var(--light-gray);
+}
+
+/* INPUT FICHIER */
+
+.upload-actions input[type="file"] {
+    display: none;
+}
+
+/* APERÇU DU FICHIER */
+
+.file-preview {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--white);
+}
+
+.file-preview img {
+    width: 48px;
+    height: 48px;
+    border-radius: 7px;
+    object-fit: cover;
+}
+
+.file-preview p {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--dark);
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* BOUTON D'ENREGISTREMENT */
+
+.record-button {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--white);
+    color: var(--black);
+    font-size: 16px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.record-button:hover {
+    background: var(--light-gray);
+}
+
+.record-button.recording {
+    background: var(--black);
+    color: var(--white);
+    animation: recordingPulse 1.2s infinite;
+}
+
+@keyframes recordingPulse {
+    0%, 100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.55;
+    }
+}
+
+/* STATUT D'ENREGISTREMENT */
+
+.recording-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    background: var(--light-gray);
+    color: var(--black);
+    font-size: 11px;
+}
+
+.recording-status::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--black);
+    animation: recordingPulse 1s infinite;
+}
+
+/* LECTEUR AUDIO */
+
+.message-content audio,
+.message-bubble audio {
+    max-width: 100%;
+    border-radius: 8px;
+}
+
+/* PETITS ÉCRANS */
+
+@media (max-width: 650px) {
+    .upload-actions {
+        gap: 5px;
+    }
+
+    .upload-actions button,
+    .upload-actions label,
+    .record-button {
+        width: 34px;
+        height: 34px;
+    }
+}
+
+
+/* =====================================
+   ZONE DE COMPOSITION DU CHAT
+===================================== */
+
+.composer-area {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 18px 24px 16px;
+    background: var(--white);
+    border-top: 1px solid var(--border);
+}
+
+/* ENVOI D'IMAGE */
 
 .image-upload-form {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 .image-upload-form input[type="file"] {
-    display: none;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    overflow: hidden;
 }
 
 .image-upload-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 10px 15px;
-    background: #f1f1f1;
-    color: #111;
-    border-radius: 10px;
+    padding: 9px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--soft);
+    color: var(--black);
+    font-size: 12px;
+    font-weight: 600;
     cursor: pointer;
-    font-size: 14px;
-    transition: background 0.2s;
+    transition: var(--transition);
 }
 
 .image-upload-button:hover {
-    background: #ddd;
+    background: var(--light-gray);
 }
 
-/* =========================
-   IMAGES DANS LA CONVERSATION
-========================= */
-
-.image-bubble {
-    padding: 5px !important;
-    overflow: hidden;
+.image-upload-form button {
+    padding: 9px 14px;
+    border: none;
+    border-radius: 8px;
+    background: var(--black);
+    color: var(--white);
+    font-size: 12px;
+    font-weight: 600;
 }
 
-.chat-image {
-    display: block;
-    width: 100%;
-    max-width: 320px;
-    max-height: 350px;
-    object-fit: contain;
-    border-radius: 10px;
+.image-upload-form button:hover {
+    background: #333333;
 }
 
-/* =========================
-   MESSAGES VOCAUX
-========================= */
-
-.audio-bubble {
-    background: #f1f1f1;
-    padding: 10px;
-    border-radius: 12px;
-}
-
-.audio-bubble audio {
-    width: 260px;
-    max-width: 100%;
-}
+/* ENREGISTREMENT VOCAL */
 
 .audio-recorder {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 12px;
+    gap: 8px;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--soft);
 }
 
-.audio-recorder button {
-    padding: 10px 16px;
-    border: 1px solid #222;
+.record-button,
+.stop-button,
+.cancel-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 13px;
+    border: 1px solid var(--border);
     border-radius: 8px;
-    background: white;
-    color: #111;
-    cursor: pointer;
+    background: var(--white);
+    color: var(--black);
+    font-size: 12px;
     font-weight: 600;
+    transition: var(--transition);
 }
 
-.audio-recorder button:disabled {
-    opacity: 0.4;
+.record-button:hover,
+.stop-button:hover:not(:disabled),
+.cancel-button:hover:not(:disabled) {
+    background: var(--black);
+    color: var(--white);
+}
+
+.stop-button:disabled,
+.cancel-button:disabled {
+    opacity: 0.35;
     cursor: not-allowed;
 }
 
-.audio-recorder .record-button:not(:disabled) {
-    background: #111;
-    color: white;
-}
-
-.audio-recorder .stop-button:not(:disabled) {
-    background: #333;
-    color: white;
-}
-
-.audio-recorder .cancel-button:not(:disabled) {
-    border-color: #999;
-}
-
-#recording-status {
+.recording-status {
     width: 100%;
-    margin: 4px 0;
+    color: var(--gray);
+    font-size: 11px;
+}
+
+/* SAISIE DU MESSAGE */
+
+.composer-area .message-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 6px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--white);
+    transition: var(--transition);
+}
+
+.composer-area .message-form:focus-within {
+    border-color: var(--black);
+}
+
+.composer-area .message-form input {
+    flex: 1;
+    min-width: 0;
+    padding: 11px 12px;
+    border: none;
+    background: transparent;
+    color: var(--black);
+    font-size: 13px;
+}
+
+.composer-area .message-form input:focus {
+    outline: none;
+}
+
+.composer-area .message-form button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 18px;
+    border: none;
+    border-radius: 8px;
+    background: var(--black);
+    color: var(--white);
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: var(--transition);
+}
+
+.composer-area .message-form button:hover {
+    background: #333333;
+}
+
+.composer-area .send-icon {
+    font-size: 15px;
+}
+
+/* TEXTES D'AIDE */
+
+.composer-area .composer-hint {
+    margin: 0;
+    color: var(--gray);
+    font-size: 10px;
+}
+
+/* ADAPTATION MOBILE */
+
+@media (max-width: 650px) {
+    .composer-area {
+        padding: 12px;
+        gap: 10px;
+    }
+
+    .audio-recorder {
+        gap: 6px;
+    }
+
+    .record-button,
+    .stop-button,
+    .cancel-button {
+        padding: 8px 10px;
+        font-size: 11px;
+    }
+
+    .composer-area .message-form button {
+        padding: 10px 12px;
+    }
+}
+
+
+/* AGRANDIR LES COMMANDES AUDIO ET IMAGE */
+
+.audio-recorder {
+    width: 100%;
+    min-height: 75px;
+    padding: 16px;
+    gap: 12px;
+}
+
+.record-button,
+.stop-button,
+.cancel-button {
+    min-height: 46px;
+    padding: 12px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 10px;
+}
+
+.record-button {
+    min-width: 190px;
+}
+
+.stop-button,
+.cancel-button {
+    min-width: 110px;
+}
+
+.image-upload-form {
+    width: 100%;
+    min-height: 65px;
+    padding: 12px;
+    background: #f5f5f5;
+    border: 1px solid #dddddd;
+    border-radius: 10px;
+}
+
+.image-upload-button,
+.image-upload-form button {
+    min-height: 46px;
+    padding: 12px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 9px;
+}
+
+.image-upload-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-upload-form button {
+    background: #111111;
+    color: #ffffff;
+    border: none;
+}
+
+.image-upload-form button:hover {
+    background: #333333;
+}
+
+/* AFFICHAGE SUR PETIT ÉCRAN */
+
+@media (max-width: 600px) {
+    .audio-recorder {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .record-button,
+    .stop-button,
+    .cancel-button {
+        width: 100%;
+    }
+
+    .image-upload-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .image-upload-button,
+    .image-upload-form button {
+        width: 100%;
+    }
 }

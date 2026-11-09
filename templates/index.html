@@ -4,7 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Chat Group — Messagerie</title>
 
     <link rel="stylesheet" href="/static/style.css">
@@ -17,10 +16,9 @@
 
 <div class="app">
 
-    <!-- BARRE LATÉRALE -->
+    <!-- SIDEBAR GAUCHE -->
     <aside class="sidebar">
 
-        <!-- IDENTITÉ DE L'APPLICATION -->
         <div class="brand">
             <div class="brand-icon">C</div>
             <div>
@@ -29,68 +27,54 @@
             </div>
         </div>
 
-        <!-- INVITATIONS REÇUES -->
+        {% if flash_message %}
+        <div class="flash-message {{ flash_type }}">
+            {{ flash_message }}
+        </div>
+        {% endif %}
+
+        <!-- INVITATIONS -->
         {% if invitations %}
-        <div class="sidebar-section">
+        <section class="sidebar-section">
 
             <div class="section-heading">
-                <span>INVITATIONS REÇUES</span>
+                <span>INVITATIONS</span>
                 <span class="section-count">{{ invitations|length }}</span>
             </div>
 
             {% for membership, group in invitations %}
-            <div class="group-item">
-
+            <div class="group-item invitation-item">
                 <span class="group-icon">#</span>
-
                 <span class="group-name">{{ group.name }}</span>
 
-                <form
-                    action="/groups/{{ group.id }}/accept"
-                    method="post"
-                >
-                    <button type="submit">
-                        Accepter
-                    </button>
+                <form action="/groups/{{ group.id }}/accept" method="post">
+                    <button type="submit">Accepter</button>
                 </form>
-
             </div>
             {% endfor %}
 
-        </div>
+        </section>
         {% endif %}
 
-        {% if flash_message %}
-            <div class="flash-message {{ flash_type }}">
-                {{ flash_message }}
-            </div>
-        {% endif %}
-
-
-        <!-- LISTE DES GROUPES -->
-        <div class="sidebar-section">
+        <!-- GROUPES -->
+        <section class="sidebar-section groups-section">
 
             <div class="section-heading">
                 <span>VOS ESPACES</span>
                 <span class="section-count">{{ groups|length }}</span>
             </div>
 
-            <!-- CRÉER UN GROUPE -->
             <form action="/groups" method="post" class="create-form">
                 <input
                     type="text"
                     name="name"
-                    placeholder="Nom du nouveau groupe..."
+                    placeholder="Créer un espace..."
                     maxlength="100"
                     required
                 >
-
-                <button type="submit" aria-label="Créer un groupe">
-                    +
-                </button>
+                <button type="submit" aria-label="Créer un groupe">+</button>
             </form>
 
-            <!-- GROUPES DISPONIBLES -->
             <div class="groups-list">
 
                 {% for group in groups %}
@@ -105,44 +89,42 @@
                     <span class="group-name">{{ group.name }}</span>
                     <span class="group-arrow">›</span>
                 </a>
-
                 {% else %}
                 <div class="no-groups">
                     <span class="no-groups-icon">＋</span>
                     <p>Aucun groupe pour le moment.</p>
-                    <small>Crée ton premier espace de discussion.</small>
+                    <small>Crée ton premier espace.</small>
                 </div>
                 {% endfor %}
 
             </div>
+        </section>
 
-        </div>
+        <!-- PROFIL -->
+        <footer class="sidebar-footer">
 
-        <!-- PROFIL ET DÉCONNEXION -->
-        <div class="sidebar-footer">
+            <div class="profile-avatar">
+                {{ user.username[0]|upper }}
+            </div>
 
             <div class="profile-info">
                 <strong>{{ user.username }}</strong>
-                <span>Connecté à Chat Group</span>
+                <span>Connecté</span>
             </div>
-
-            <span class="online-dot"></span>
 
             <form action="/deconnexion" method="post">
                 <button
                     type="submit"
                     class="logout-button"
                     title="Déconnexion"
-                >
-                    <span>↪</span>
-                </button>
+                >↪</button>
             </form>
 
-        </div>
+        </footer>
 
     </aside>
 
-    <!-- CONTENU PRINCIPAL -->
+    <!-- ZONE CENTRALE -->
     <main class="main-content" id="chat-panel">
 
         <div class="welcome-screen">
@@ -171,6 +153,34 @@
         </div>
 
     </main>
+
+    <!-- PANNEAU DROIT -->
+    <aside class="details-panel" id="details-panel">
+
+        <div class="details-header">
+            <span>INFORMATIONS</span>
+            <span class="details-icon">ⓘ</span>
+        </div>
+
+        <div class="details-empty">
+
+            <div class="details-empty-icon">#</div>
+
+            <h3>Bienvenue</h3>
+
+            <p>
+                Sélectionne un groupe pour retrouver
+                ses informations et ses membres.
+            </p>
+
+        </div>
+
+        <div class="details-footer">
+            CHAT GROUP
+            <span>Messagerie en temps réel</span>
+        </div>
+
+    </aside>
 
 </div>
 

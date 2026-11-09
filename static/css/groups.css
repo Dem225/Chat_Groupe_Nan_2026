@@ -1,352 +1,367 @@
-/* =========================
-   SIDEBAR
-========================= */
+
+/* ========================================
+   SIDEBAR — GROUPES ET PROFIL
+======================================== */
 
 .sidebar {
-    width: 290px;
-    min-width: 290px;
-    background: var(--white);
-    border-right: 1px solid var(--border);
+    width: 100%;
+    height: 100%;
+    min-width: 0;
     display: flex;
     flex-direction: column;
-    padding: 30px 20px 18px;
+    background: var(--white);
+    border-right: 1px solid var(--border);
+    padding: 24px 18px 16px;
+    overflow: hidden;
 }
 
-/* Logo */
+/* IDENTITÉ */
 
 .brand {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 55px;
+    padding: 4px 4px 28px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
 }
 
 .brand-icon {
     width: 43px;
     height: 43px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: var(--black);
-    color: white;
+    color: var(--white);
     border-radius: 13px;
-    display: grid;
-    place-items: center;
-    font-size: 22px;
+    font-size: 23px;
     font-weight: 800;
 }
 
 .brand h1 {
-    font-size: 19px;
+    font-size: 17px;
     font-weight: 800;
-    letter-spacing: -0.7px;
+    letter-spacing: -0.5px;
 }
 
 .brand span {
     display: block;
-    font-size: 11px;
+    margin-top: 2px;
     color: var(--gray);
-    margin-top: 3px;
+    font-size: 10px;
 }
 
-/* Groupes */
+/* SECTIONS */
 
 .sidebar-section {
+    margin-top: 27px;
+    flex-shrink: 0;
+}
+
+.groups-section {
     flex: 1;
+    min-height: 0;
     overflow-y: auto;
 }
 
 .section-heading {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 18px;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    color: var(--gray);
     font-size: 10px;
     font-weight: 800;
-    letter-spacing: 1.5px;
-    color: #999;
+    letter-spacing: 1.2px;
 }
 
 .section-count {
+    min-width: 23px;
+    height: 23px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
     background: var(--soft);
     color: var(--black);
-    padding: 4px 9px;
-    border-radius: 20px;
     font-size: 11px;
 }
 
-/* Création groupe */
+/* CRÉATION DE GROUPE */
 
 .create-form {
     display: flex;
-    gap: 8px;
-    margin-bottom: 25px;
+    gap: 7px;
+    margin-bottom: 17px;
 }
 
 .create-form input {
-    flex: 1;
+    width: 100%;
     min-width: 0;
-    height: 43px;
+    height: 42px;
+    padding: 0 12px;
+    background: var(--soft);
     border: 1px solid var(--border);
     border-radius: 9px;
-    padding: 0 12px;
-    outline: none;
+    color: var(--black);
     font-size: 12px;
-    background: #fafafa;
-    transition: 0.2s;
+    transition: var(--transition);
 }
 
 .create-form input:focus {
-    border-color: #777;
-    background: white;
+    border-color: var(--black);
+    background: var(--white);
+}
+
+.create-form input::placeholder {
+    color: #999999;
 }
 
 .create-form button {
-    width: 43px;
-    height: 43px;
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
     border: none;
     border-radius: 9px;
     background: var(--black);
-    color: white;
-    font-size: 23px;
-    cursor: pointer;
-    transition: 0.2s;
+    color: var(--white);
+    font-size: 22px;
+    transition: var(--transition);
 }
 
 .create-form button:hover {
-    background: #444;
+    background: #444444;
 }
 
-/* Liste des groupes */
+/* LISTE DES GROUPES */
 
 .groups-list {
     display: flex;
     flex-direction: column;
-    gap: 7px;
+    gap: 5px;
 }
 
 .group-item {
+    min-height: 47px;
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px;
-    text-decoration: none;
-    color: #555;
+    gap: 11px;
+    padding: 8px 10px;
+    border: 1px solid transparent;
     border-radius: 9px;
-    transition: 0.2s;
+    color: var(--dark);
+    transition: var(--transition);
 }
 
 .group-item:hover {
     background: var(--soft);
-    color: var(--black);
+    border-color: var(--border);
 }
 
 .group-icon {
-    width: 30px;
-    height: 30px;
-    display: grid;
-    place-items: center;
+    width: 29px;
+    height: 29px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
     border-radius: 8px;
-    background: #f0f0f0;
-    font-weight: 800;
+    background: #eeeeee;
+    color: var(--black);
     font-size: 17px;
+    font-weight: 700;
 }
 
 .group-name {
+    min-width: 0;
     flex: 1;
-    font-size: 13px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
     font-weight: 600;
 }
 
 .group-arrow {
-    color: #aaa;
-    font-size: 21px;
+    color: #999999;
+    font-size: 20px;
 }
 
-/* Aucun groupe */
+/* INVITATIONS */
+
+.invitation-item {
+    background: var(--soft);
+    margin-bottom: 7px;
+    border-color: var(--border);
+}
+
+.invitation-item form {
+    flex-shrink: 0;
+}
+
+.invitation-item button {
+    border: none;
+    border-radius: 7px;
+    background: var(--black);
+    color: var(--white);
+    padding: 7px 9px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.invitation-item button:hover {
+    background: #444444;
+}
+
+/* AUCUN GROUPE */
 
 .no-groups {
+    padding: 28px 10px;
     text-align: center;
-    padding: 25px 10px;
-    color: var(--gray);
+    border: 1px dashed #cccccc;
+    border-radius: 10px;
 }
 
 .no-groups-icon {
-    font-size: 27px;
+    font-size: 25px;
+    color: var(--gray);
 }
 
 .no-groups p {
-    margin: 10px 0 5px;
+    margin-top: 9px;
     font-size: 12px;
     font-weight: 700;
-    color: #555;
 }
 
 .no-groups small {
-    font-size: 11px;
+    display: block;
+    margin-top: 5px;
+    color: var(--gray);
+    font-size: 10px;
 }
 
-/* Profil */
+/* PROFIL */
 
 .sidebar-footer {
     display: flex;
     align-items: center;
-    gap: 11px;
-    padding: 15px 5px 5px;
+    gap: 10px;
+    padding: 17px 2px 0;
+    margin-top: 15px;
     border-top: 1px solid var(--border);
-    margin-top: 20px;
+    flex-shrink: 0;
 }
 
 .profile-avatar {
-    width: 38px;
-    height: 38px;
-    display: grid;
-    place-items: center;
+    width: 37px;
+    height: 37px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
     border-radius: 50%;
     background: var(--black);
-    color: white;
-    font-weight: 700;
+    color: var(--white);
+    font-weight: 800;
+    font-size: 13px;
 }
 
 .profile-info {
+    min-width: 0;
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
 }
 
 .profile-info strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     font-size: 12px;
 }
 
 .profile-info span {
-    font-size: 10px;
     color: var(--gray);
+    font-size: 10px;
 }
 
-.online-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #333;
+.sidebar-footer form {
+    flex-shrink: 0;
 }
 
-/* =========================
-   INVITATIONS REÇUES
-========================= */
-
-.sidebar-section:has(.group-item form) {
-    flex: initial;
-    margin-bottom: 25px;
-}
-
-.sidebar-section .group-item:has(form) {
-    background: #f7f7f7;
+.logout-button {
+    width: 35px;
+    height: 35px;
     border: 1px solid var(--border);
-    margin-bottom: 8px;
-    padding: 10px;
+    border-radius: 9px;
+    background: var(--white);
+    color: var(--black);
+    font-size: 18px;
+    transition: var(--transition);
 }
 
-.sidebar-section .group-item:has(form) .group-name {
-    font-size: 12px;
-}
-
-.sidebar-section .group-item form button {
-    padding: 7px 11px;
-    border: none;
-    border-radius: 7px;
+.logout-button:hover {
     background: var(--black);
-    color: white;
+    color: var(--white);
+}
+
+/* MESSAGE FLASH */
+
+.flash-message {
+    margin-top: 15px;
+    padding: 11px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--soft);
+    color: var(--black);
     font-size: 11px;
-    font-weight: 700;
-    cursor: pointer;
 }
 
-.sidebar-section .group-item form button:hover {
-    background: #444;
+.flash-message.error {
+    background: #eeeeee;
+    border-color: #999999;
+    color: #222222;
 }
 
+.flash-message.success {
+    background: #f5f5f5;
+    border-color: #cccccc;
+    color: #222222;
+}
 
+/* RESPONSIVE */
 
-
-
-
-
-
-
-/* =========================
-   RESPONSIVE SIDEBAR
-========================= */
-
-@media (max-width: 750px) {
+@media (max-width: 650px) {
     .sidebar {
-        width: 220px;
-        min-width: 220px;
-        padding: 20px 12px;
+        height: auto;
+        padding: 12px 15px;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
     }
 
     .brand {
-        margin-bottom: 35px;
-    }
-}
-
-@media (max-width: 520px) {
-    .sidebar {
-        width: 105px;
-        min-width: 105px;
-        padding: 15px 8px;
+        padding: 0;
+        border: none;
     }
 
-    .brand {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
+    .brand-icon {
+        width: 35px;
+        height: 35px;
+        font-size: 19px;
     }
 
     .brand h1 {
-        font-size: 13px;
+        font-size: 14px;
     }
 
     .brand span {
         display: none;
     }
 
-    .section-heading {
-        font-size: 8px;
-        letter-spacing: 0;
-    }
-
-    .create-form {
-        flex-direction: column;
-    }
-
-    .create-form input {
-        width: 100%;
-        font-size: 10px;
-        padding: 8px;
-    }
-
-    .create-form button {
-        width: 100%;
-    }
-
-    .group-item {
-        padding: 9px 5px;
-        gap: 5px;
-    }
-
-    .group-name {
-        font-size: 10px;
-        overflow-wrap: anywhere;
-    }
-
-    .group-arrow {
-        display: none;
-    }
-
-    .profile-info,
-    .sidebar-footer > .online-dot {
-        display: none;
-    }
-
+    .sidebar-section,
     .sidebar-footer {
-        justify-content: center;
+        display: none;
     }
 }

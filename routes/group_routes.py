@@ -128,7 +128,10 @@ async def group_view(
         db,
         group_id,
     )
-
+    members = await group_service.get_group_members(
+        db,
+        group_id,
+    )
 
     is_admin = await group_service.is_group_admin(
         db,
@@ -148,6 +151,8 @@ async def group_view(
             "is_admin": is_admin,
             "flash_message": flash_message,
             "flash_type": flash_type,
+            "members": members,
+            
         },
     )
 
