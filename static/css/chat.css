@@ -309,3 +309,77 @@
 .message-form .send-icon {
     font-size: 20px;
 }
+
+
+/* ========================================
+   INVITATION — DESIGN AMÉLIORÉ
+======================================== */
+
+.invite-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px;
+    background: #f5f5f5;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+}
+
+.invite-form input {
+    width: 220px;
+    height: 42px;
+    padding: 0 14px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #111111;
+    font-size: 14px;
+    outline: none;
+    transition: 0.2s ease;
+}
+
+.invite-form input:focus {
+    border-color: #999999;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+}
+
+.invite-form input::placeholder {
+    color: #999999;
+    font-size: 13px;
+}
+
+.invite-form button {
+    min-width: 110px;
+    height: 42px;
+    padding: 0 16px;
+    border: none;
+    border-radius: 8px;
+    background: #111111;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    transition: 0.2s ease;
+}
+
+.invite-form button:hover {
+    background: #444444;
+    transform: translateY(-1px);
+}
+
+/* VERSION MOBILE */
+
+@media (max-width: 650px) {
+    .invite-form {
+        width: 100%;
+    }
+
+    .invite-form input {
+        width: auto;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .invite-form button {
+        min-width: 100px;
+    }
+}

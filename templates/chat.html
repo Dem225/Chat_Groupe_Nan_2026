@@ -28,6 +28,9 @@
                 action="/groups/{{ group.id }}/invite"
                 method="post"
                 class="invite-form"
+                hx-post="/groups/{{ group.id }}/invite"
+                hx-target="#chat-panel"
+                hx-swap="innerHTML"
             >
                 <input
                     type="text"
@@ -525,7 +528,7 @@
         </div>
 
         <div class="details-footer">
-            CHAT GROUP
+             NEXORA
             <span>Messagerie en temps réel</span>
         </div>
 
