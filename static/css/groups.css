@@ -229,6 +229,49 @@
 }
 
 /* =========================
+   INVITATIONS REÇUES
+========================= */
+
+.sidebar-section:has(.group-item form) {
+    flex: initial;
+    margin-bottom: 25px;
+}
+
+.sidebar-section .group-item:has(form) {
+    background: #f7f7f7;
+    border: 1px solid var(--border);
+    margin-bottom: 8px;
+    padding: 10px;
+}
+
+.sidebar-section .group-item:has(form) .group-name {
+    font-size: 12px;
+}
+
+.sidebar-section .group-item form button {
+    padding: 7px 11px;
+    border: none;
+    border-radius: 7px;
+    background: var(--black);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.sidebar-section .group-item form button:hover {
+    background: #444;
+}
+
+
+
+
+
+
+
+
+
+/* =========================
    RESPONSIVE SIDEBAR
 ========================= */
 

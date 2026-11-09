@@ -47,6 +47,18 @@ async def websocket_chat(
         await websocket.close(code=1008)
         return
 
+    # Vérifier que l'utilisateur est membre accepté
+    async with SessionLocal() as db:
+        is_member = await group_service.is_group_member(
+            db,
+            user_id,
+            group_id,
+        )
+
+    if not is_member:
+        await websocket.close(code=1008)
+        return
+
     username = user.username
 
     # Connecter l'utilisateur au groupe

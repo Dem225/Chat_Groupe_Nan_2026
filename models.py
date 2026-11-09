@@ -1,6 +1,6 @@
 
 from datetime import datetime
-
+from sqlalchemy import UniqueConstraint
 from sqlalchemy import String, Text, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -72,3 +72,62 @@ class PendingRegistration(Base):
     )
 
     attempts: Mapped[int] = mapped_column(default=0)
+
+
+
+class GroupMember(Base):
+    __tablename__ = "group_members"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE")
+    )
+
+    group_id: Mapped[int] = mapped_column(
+        ForeignKey("chat_groups.id", ondelete="CASCADE")
+    )
+
+    role: Mapped[str] = mapped_column(
+        String(20),
+        default="member"
+    )
+
+    status: Mapped[str] = mapped_column(
+        String(20),
+        default="invited"
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=datetime.utcnow
+    )
+
+    __table_args__ = (
+        UniqueConstraint(
+            "user_id",
+            "group_id",
+            name="uq_user_group"
+        ),
+    )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

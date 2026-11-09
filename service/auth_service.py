@@ -231,3 +231,23 @@ async def get_user_by_id(
     user_id: int
 ):
     return await db.get(User, user_id)
+
+
+
+
+
+
+
+
+
+async def get_user_by_username(
+    db: AsyncSession,
+    username: str
+):
+    result = await db.execute(
+        select(User).where(
+            User.username == username.strip()
+        )
+    )
+
+    return result.scalar_one_or_none()

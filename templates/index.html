@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -19,6 +20,7 @@
     <!-- BARRE LATÉRALE -->
     <aside class="sidebar">
 
+        <!-- IDENTITÉ DE L'APPLICATION -->
         <div class="brand">
             <div class="brand-icon">C</div>
             <div>
@@ -27,12 +29,53 @@
             </div>
         </div>
 
+        <!-- INVITATIONS REÇUES -->
+        {% if invitations %}
         <div class="sidebar-section">
+
+            <div class="section-heading">
+                <span>INVITATIONS REÇUES</span>
+                <span class="section-count">{{ invitations|length }}</span>
+            </div>
+
+            {% for membership, group in invitations %}
+            <div class="group-item">
+
+                <span class="group-icon">#</span>
+
+                <span class="group-name">{{ group.name }}</span>
+
+                <form
+                    action="/groups/{{ group.id }}/accept"
+                    method="post"
+                >
+                    <button type="submit">
+                        Accepter
+                    </button>
+                </form>
+
+            </div>
+            {% endfor %}
+
+        </div>
+        {% endif %}
+
+        {% if flash_message %}
+            <div class="flash-message {{ flash_type }}">
+                {{ flash_message }}
+            </div>
+        {% endif %}
+
+
+        <!-- LISTE DES GROUPES -->
+        <div class="sidebar-section">
+
             <div class="section-heading">
                 <span>VOS ESPACES</span>
                 <span class="section-count">{{ groups|length }}</span>
             </div>
 
+            <!-- CRÉER UN GROUPE -->
             <form action="/groups" method="post" class="create-form">
                 <input
                     type="text"
@@ -41,45 +84,56 @@
                     maxlength="100"
                     required
                 >
-                <button type="submit" aria-label="Créer un groupe">+</button>
+
+                <button type="submit" aria-label="Créer un groupe">
+                    +
+                </button>
             </form>
 
+            <!-- GROUPES DISPONIBLES -->
             <div class="groups-list">
 
                 {% for group in groups %}
-                    <a
-                        href="/groups/{{ group.id }}/view"
-                        hx-get="/groups/{{ group.id }}/view"
-                        hx-target="#chat-panel"
-                        hx-swap="innerHTML"
-                        class="group-item"
-                    >
-                        <span class="group-icon">#</span>
-                        <span class="group-name">{{ group.name }}</span>
-                        <span class="group-arrow">›</span>
-                    </a>
+                <a
+                    href="/groups/{{ group.id }}/view"
+                    hx-get="/groups/{{ group.id }}/view"
+                    hx-target="#chat-panel"
+                    hx-swap="innerHTML"
+                    class="group-item"
+                >
+                    <span class="group-icon">#</span>
+                    <span class="group-name">{{ group.name }}</span>
+                    <span class="group-arrow">›</span>
+                </a>
+
                 {% else %}
-                    <div class="no-groups">
-                        <span class="no-groups-icon">＋</span>
-                        <p>Aucun groupe pour le moment.</p>
-                        <small>Crée ton premier espace de discussion.</small>
-                    </div>
+                <div class="no-groups">
+                    <span class="no-groups-icon">＋</span>
+                    <p>Aucun groupe pour le moment.</p>
+                    <small>Crée ton premier espace de discussion.</small>
+                </div>
                 {% endfor %}
 
             </div>
+
         </div>
 
+        <!-- PROFIL ET DÉCONNEXION -->
         <div class="sidebar-footer">
-            
+
             <div class="profile-info">
-                <strong> {{ user.username }} </strong>
+                <strong>{{ user.username }}</strong>
                 <span>Connecté à Chat Group</span>
             </div>
 
             <span class="online-dot"></span>
 
             <form action="/deconnexion" method="post">
-                <button type="submit" class="logout-button" title="Déconnexion">
+                <button
+                    type="submit"
+                    class="logout-button"
+                    title="Déconnexion"
+                >
                     <span>↪</span>
                 </button>
             </form>
@@ -87,7 +141,6 @@
         </div>
 
     </aside>
-
 
     <!-- CONTENU PRINCIPAL -->
     <main class="main-content" id="chat-panel">
@@ -100,7 +153,10 @@
 
             <span class="eyebrow">BIENVENUE SUR CHAT GROUP</span>
 
-            <h2>Les conversations<br>commencent ici.</h2>
+            <h2>
+                Les conversations<br>
+                commencent ici.
+            </h2>
 
             <p>
                 Sélectionne un groupe dans la barre latérale

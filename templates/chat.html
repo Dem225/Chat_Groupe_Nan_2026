@@ -1,4 +1,9 @@
 <section class="chat-room" hx-ext="ws" ws-connect="/ws/{{ group.id }}">
+    {% if flash_message %}
+        <div class="flash-message {{ flash_type }}">
+            {{ flash_message }}
+        </div>
+    {% endif %}
 
     <!-- EN-TÊTE DU GROUPE -->
     <header class="chat-header">
@@ -15,6 +20,32 @@
             <span class="online-dot"></span>
             Temps réel
         </div>
+
+
+
+        {% if is_admin %}
+            <form
+                action="/groups/{{ group.id }}/invite"
+                method="post"
+                class="invite-form"
+            >
+                <input
+                    type="text"
+                    name="username"
+                    placeholder="Nom d'utilisateur à inviter..."
+                    required
+                >
+
+                <button type="submit">
+                    + Inviter
+                </button>
+            </form>
+        {% endif %}
+
+
+
+
+        
     </header>
 
 

@@ -196,6 +196,118 @@
 }
 
 /* =========================
+   INVITATIONS ET NOTIFICATIONS
+========================= */
+
+/* Formulaire d'invitation */
+
+.invite-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.invite-form input {
+    width: 250px;
+    height: 42px;
+    padding: 0 14px;
+    border: 1px solid #cccccc;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #151515;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    overflow: visible;
+}
+
+.invite-form input::placeholder {
+    color: #888888;
+}
+
+.invite-form input:focus {
+    border-color: #151515;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);
+}
+.invite-form button {
+    height: 38px;
+    padding: 0 15px;
+    border: none;
+    border-radius: 8px;
+    background: var(--black);
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.invite-form button:hover {
+    background: #444;
+}
+
+/* Messages temporaires */
+
+.flash-message {
+    margin: 15px 35px 0;
+    padding: 13px 16px;
+    border: 1px solid #777;
+    border-left: 4px solid var(--black);
+    border-radius: 8px;
+    background: #f1f1f1;
+    color: #111;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* Adaptation mobile */
+
+@media (max-width: 750px) {
+    .chat-header {
+        flex-wrap: wrap;
+        gap: 12px;
+        padding-top: 15px;
+        padding-bottom: 15px;
+    }
+
+    .invite-form {
+        width: 100%;
+    }
+
+    .invite-form input {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .flash-message {
+        margin: 12px 15px 0;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================
    RESPONSIVE
 ========================= */
 

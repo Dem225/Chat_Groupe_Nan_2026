@@ -52,6 +52,21 @@ async def upload_group_image(
             detail="Groupe introuvable.",
         )
 
+    is_member = await group_service.is_group_member(
+    db,
+    user.id,
+    group_id,
+)
+
+    if not is_member:
+        raise HTTPException(
+            status_code=403,
+            detail="Tu n'es pas membre de ce groupe.",
+        )
+
+
+
+
     # Limite de 5 Mo
     max_size = 5 * 1024 * 1024
 
@@ -154,6 +169,21 @@ async def upload_group_audio(
             status_code=404,
             detail="Groupe introuvable.",
         )
+
+    is_member = await group_service.is_group_member(
+    db,
+    user.id,
+    group_id,
+)
+
+    if not is_member:
+        raise HTTPException(
+            status_code=403,
+            detail="Tu n'es pas membre de ce groupe.",
+        )
+
+
+
 
     # Formats audio acceptés
     extensions = {
