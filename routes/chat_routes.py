@@ -9,7 +9,7 @@ from service import auth_service, group_service, chat_service
 
 import os
 from dotenv import load_dotenv
-import time
+import logging
 
 
 
@@ -24,7 +24,7 @@ ALLOWED_WS_ORIGINS = {
     if origin.strip()
 }
 
-
+logger = logging.getLogger(__name__)
 
 # =====================================
 # WEBSOCKET : DISCUSSION EN TEMPS RÉEL
@@ -125,7 +125,7 @@ async def websocket_chat(
             if not content:
                 continue
 
-            current_time = time.monotonic()
+            
 
             if not chat_service.manager.can_send_message(user_id):
                 continue
@@ -155,8 +155,12 @@ async def websocket_chat(
     except WebSocketDisconnect:
         pass
 
-    finally:
-        chat_service.manager.disconnect(
-            websocket,
-            group_id,
+    except Exception:
+        logger.exception(
+            "Erreur inattendue dans le WebSocket du groupe %s",
+            group_id
         )
+        raise
+
+    finally:
+        chat_service.manager.disconnect(websocket, group_id)
