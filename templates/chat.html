@@ -226,6 +226,40 @@
 
         });
 
+                // Identifier les messages envoyés et reçus
+        const currentUsername = {{ user.username | tojson }};
+
+        document.body.addEventListener("htmx:wsAfterMessage", function () {
+
+            const messagesContainer = document.getElementById("messages");
+
+            if (!messagesContainer) {
+                return;
+            }
+
+            const messages = messagesContainer.querySelectorAll(
+                "article.message[data-username]"
+            );
+
+            messages.forEach(message => {
+
+                if (message.dataset.username === currentUsername) {
+                    message.classList.add("message-own");
+                    message.classList.remove("message-received");
+                } else {
+                    message.classList.add("message-received");
+                    message.classList.remove("message-own");
+                }
+
+            });
+
+            // Descendre automatiquement vers le dernier message
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        });
+
+
+
 
         // ==================================
         // ENREGISTREMENT DES MESSAGES VOCAUX

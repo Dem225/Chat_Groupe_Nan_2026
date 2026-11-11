@@ -3,7 +3,7 @@
 
 <div hx-swap-oob="beforeend:#messages">
 
-    <article class="message {% if message.username == current_username %}message-own{% else %}message-received{% endif %}">
+    <article class="message" data-username="{{ message.username }}">
 
         <!-- Avatar -->
         <div class="message-avatar">
