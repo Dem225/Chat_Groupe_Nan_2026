@@ -5,9 +5,41 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_db
 from core.templates import templates
 from service import auth_service
-
+from dotenv import load_dotenv
+from authlib.integrations.starlette_client import OAuth
+import os
+import logging
 
 router = APIRouter()
+
+logger = logging.getLogger(__name__)
+
+
+# ==============================
+# CONFIGURATION GOOGLE OAUTH
+# ==============================
+
+load_dotenv()
+
+oauth = OAuth()
+
+oauth.register(
+    name="google",
+    client_id=os.getenv("GOOGLE_CLIENT_ID"),
+    client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+    server_metadata_url=(
+        "https://accounts.google.com/.well-known/openid-configuration"
+    ),
+    client_kwargs={
+        "scope": "openid email profile"
+    }
+)
+
+
+
+
+
+
 
 
 # ==============================
@@ -291,3 +323,87 @@ async def deconnexion(request: Request):
         "/connexion",
         status_code=303
     )
+
+
+
+
+
+
+
+# ==============================
+# CONNEXION AVEC GOOGLE
+# ==============================
+
+@router.get("/auth/google")
+async def google_login(request: Request):
+
+    redirect_uri = os.getenv("GOOGLE_REDIRECT_URI")
+
+    if not redirect_uri:
+        raise RuntimeError("GOOGLE_REDIRECT_URI est absent du .env")
+
+    return await oauth.google.authorize_redirect(
+        request,
+        redirect_uri
+    )
+
+
+# ==============================
+# RETOUR DE GOOGLE
+# ==============================
+
+@router.get("/auth/google/callback", name="google_callback")
+async def google_callback(
+    request: Request,
+    db: AsyncSession = Depends(get_db)
+):
+
+    try:
+        token = await oauth.google.authorize_access_token(request)
+
+        user_info = token.get("userinfo")
+
+        if not user_info:
+            raise ValueError("Impossible de récupérer les informations Google.")
+
+        if not user_info.get("email_verified"):
+            raise ValueError("Votre adresse Google n'est pas vérifiée.")
+
+        google_sub = user_info.get("sub")
+        email = user_info.get("email")
+
+        if not google_sub or not email:
+            raise ValueError("Informations Google incomplètes.")
+
+        user = await auth_service.authenticate_google_user(
+            db,
+            google_sub,
+            email
+        )
+
+        request.session.clear()
+        request.session["user_id"] = user.id
+
+        return RedirectResponse("/", status_code=303)
+
+    except Exception:
+        logger.exception("Erreur pendant la connexion Google")
+        request.session.clear()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 import secrets
-
+import re
 from sqlalchemy import select, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from pwdlib import PasswordHash
@@ -8,6 +8,12 @@ from email_validator import validate_email, EmailNotValidError
 
 from models import User, PendingRegistration
 from service.email_service import send_verification_email
+
+import os
+
+from dotenv import load_dotenv
+from authlib.integrations.starlette_client import OAuth
+
 
 
 password_hash = PasswordHash.recommended()
@@ -251,3 +257,113 @@ async def get_user_by_username(
     )
 
     return result.scalar_one_or_none()
+
+
+
+
+
+async def authenticate_google_user(
+    db: AsyncSession,
+    google_sub: str,
+    email: str
+):
+    email = email.strip().lower()
+
+    # 1. Vérifier si le compte Google existe déjà
+    result = await db.execute(
+        select(User).where(User.google_sub == google_sub)
+    )
+    user = result.scalar_one_or_none()
+
+    if user:
+        return user
+
+    # 2. Vérifier si l'adresse email existe déjà
+    result = await db.execute(
+        select(User).where(User.email == email)
+    )
+    user = result.scalar_one_or_none()
+
+    if user:
+        # Ne pas associer deux comptes Google différents
+        if user.google_sub and user.google_sub != google_sub:
+            raise ValueError(
+                "Cette adresse email est déjà associée à un autre compte Google."
+            )
+
+        user.google_sub = google_sub
+        await db.commit()
+        await db.refresh(user)
+        return user
+
+    # 3. Générer un nom d'utilisateur disponible
+    base_username = re.sub(
+        r"[^a-zA-Z0-9_]",
+        "_",
+        email.split("@")[0]
+    )[:80] or "google_user"
+
+    username = base_username
+    counter = 1
+
+    while True:
+        result = await db.execute(
+            select(User).where(User.username == username)
+        )
+
+        if result.scalar_one_or_none() is None:
+            break
+
+        username = f"{base_username}_{counter}"
+        counter += 1
+
+    # 4. Créer le nouvel utilisateur
+    user = User(
+        username=username,
+        email=email,
+        hashed_password=password_hash.hash(
+            secrets.token_urlsafe(48)
+        ),
+        google_sub=google_sub
+    )
+
+    db.add(user)
+    await db.commit()
+    await db.refresh(user)
+
+    return user
+
+
+
+
+
+# Charger les variables d'environnement
+load_dotenv()
+
+# Configuration Google OAuth
+oauth = OAuth()
+
+oauth.register(
+    name="google",
+    client_id=os.getenv("GOOGLE_CLIENT_ID"),
+    client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+    server_metadata_url=(
+        "https://accounts.google.com/.well-known/openid-configuration"
+    ),
+    client_kwargs={
+        "scope": "openid email profile"
+    }
+)
+
+
+
+
+
+
+
+
+
+
+
+
+
