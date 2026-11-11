@@ -16,7 +16,9 @@ class ConnectionManager:
     def disconnect(self, websocket: WebSocket, group_id: int):
         if websocket in self.connections.get(group_id, []):
             self.connections[group_id].remove(websocket)
-
+        if not self.connections.get(group_id):
+            self.connections.pop(group_id, None)
+            
     async def broadcast(self, group_id: int, message: str):
         for connection in self.connections.get(group_id, [])[:]:
             try:

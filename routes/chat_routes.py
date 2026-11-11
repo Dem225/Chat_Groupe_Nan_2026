@@ -7,8 +7,23 @@ from database import SessionLocal
 from core.templates import templates
 from service import auth_service, group_service, chat_service
 
+import os
+from dotenv import load_dotenv
+
+
+
 
 router = APIRouter()
+
+
+load_dotenv()
+
+ALLOWED_WS_ORIGINS = {
+    origin.strip().rstrip("/")
+    for origin in os.getenv("ALLOWED_WS_ORIGINS", "").split(",")
+    if origin.strip()
+}
+
 
 
 # =====================================
@@ -20,7 +35,14 @@ async def websocket_chat(
     websocket: WebSocket,
     group_id: int,
 ):
-    # Vérifier la session de l'utilisateur
+
+    # Vérifier l'origine de la connexion
+    origin = websocket.headers.get("origin", "").rstrip("/")
+
+    if origin not in ALLOWED_WS_ORIGINS:
+        await websocket.close(code=1008)
+        return
+     # Vérifier la session de l'utilisateur
     user_id = websocket.scope.get(
         "session",
         {},
