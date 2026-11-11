@@ -7,8 +7,7 @@ from database import get_db
 from core.templates import templates
 from dependencies.auth import get_current_user
 from service import group_service
-
-
+from dependencies.auth import get_optional_user, get_current_user
 router = APIRouter()
 
 
@@ -21,7 +20,7 @@ async def accueil(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    user = await get_current_user(request, db)
+    user = await get_optional_user(request, db)
 
     if user is None:
         return RedirectResponse("/connexion", status_code=303)

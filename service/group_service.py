@@ -1,6 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from pathlib import Path
 from models import ChatGroup, Message, GroupMember , User
 
 async def create_group(db: AsyncSession, name: str, user_id: int):
@@ -237,7 +237,18 @@ async def get_group_members(
 
 
 
+async def get_message_by_file_path(
+    db: AsyncSession,
+    file_path: str,
+):
+    result = await db.execute(
+        select(Message).where(
+            (Message.image_path == file_path)
+            | (Message.audio_path == file_path)
+        )
+    )
 
+    return result.scalar_one_or_none()
 
 
 

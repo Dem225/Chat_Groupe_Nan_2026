@@ -59,26 +59,30 @@ app = FastAPI(
 # MIDDLEWARE DE SESSION
 # =====================================
 
-app.add_middleware(
-    SessionMiddleware,
-    secret_key=os.getenv(
-        "SESSION_SECRET",
-        "cle-secrete-de-developpement-a-remplacer",
-    ),
-    same_site="lax",
-    https_only=False,
+SESSION_SECRET = os.getenv("SESSION_SECRET")
+
+if not SESSION_SECRET:
+    raise RuntimeError(
+        "SESSION_SECRET est absent du fichier .env"
+    )
+
+SESSION_HTTPS_ONLY = (
+    os.getenv("SESSION_HTTPS_ONLY", "true").lower()
+    in ("true", "1", "yes")
 )
 
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=SESSION_SECRET,
+    same_site="lax",
+    https_only=SESSION_HTTPS_ONLY,
+)
 
 # =====================================
 # FICHIERS STATIQUES
 # =====================================
 
-app.mount(
-    "/uploads",
-    StaticFiles(directory="uploads"),
-    name="uploads",
-)
+
 
 app.mount(
     "/static",

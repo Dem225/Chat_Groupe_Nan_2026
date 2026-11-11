@@ -24,7 +24,7 @@
 
                 <div class="message-bubble image-bubble">
                     <img
-                        src="{{ message.image_path }}"
+                        src="/files/{{ message.image_path.split("/")[-1] }}"
                         alt="Image envoyée par {{ message.username }}"
                         class="chat-image"
                     >
@@ -35,7 +35,7 @@
 
                 <div class="message-bubble audio-bubble">
                     <audio controls preload="metadata">
-                        <source src="{{ message.audio_path }}">
+                        <source src="/files/{{ message.audio_path.split("/")[-1] }}">
                         Votre navigateur ne supporte pas la lecture audio.
                     </audio>
                 </div>

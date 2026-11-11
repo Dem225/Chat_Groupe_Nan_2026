@@ -21,6 +21,10 @@ from core.templates import templates
 from dependencies.auth import get_current_user
 from service import group_service, chat_service
 
+from fastapi.responses import FileResponse
+from urllib.parse import unquote
+
+
 
 router = APIRouter()
 
@@ -253,3 +257,74 @@ async def upload_group_audio(
     )
 
     return Response(status_code=204)
+
+
+
+@router.get("/files/{filename}")
+async def get_group_file(
+    request: Request,
+    filename: str,
+    db: AsyncSession = Depends(get_db),
+):
+    # Vérifier la connexion
+    user = await get_current_user(request, db)
+
+    # Empêcher les chemins de fichiers manipulés
+    filename = Path(filename).name
+
+    # Chercher le message associé au fichier
+    image_path = f"/uploads/images/{filename}"
+    audio_path = f"/uploads/audios/{filename}"
+
+    message = await group_service.get_message_by_file_path(
+        db,
+        image_path,
+    )
+
+    if message is None:
+        message = await group_service.get_message_by_file_path(
+            db,
+            audio_path,
+        )
+
+    if message is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Fichier introuvable.",
+        )
+
+    # Vérifier que l'utilisateur appartient au groupe
+    is_member = await group_service.is_group_member(
+        db,
+        user.id,
+        message.group_id,
+    )
+
+    if not is_member:
+        raise HTTPException(
+            status_code=403,
+            detail="Accès interdit à ce fichier.",
+        )
+
+    # Déterminer le chemin physique
+    if message.image_path == image_path:
+        file_path = Path("uploads/images") / filename
+    else:
+        file_path = Path("uploads/audios") / filename
+
+    if not file_path.is_file():
+        raise HTTPException(
+            status_code=404,
+            detail="Fichier introuvable.",
+        )
+
+    return FileResponse(file_path)
+
+
+
+
+
+
+
+
+
