@@ -93,10 +93,19 @@ async def websocket_chat(
         while True:
 
             try:
-                data = json.loads(
-                    await websocket.receive_text()
-                )
+                packet = await websocket.receive()
+                if packet["type"] == "websocket.disconnect":
+                    break
+                raw_data = packet.get("text")
+                if raw_data is None:
+                    continue
 
+                if len(raw_data.encode("utf-8")) > 16_384:
+                    await websocket.close(code=1009)
+                    break
+
+                data = json.loads(raw_data)
+                
             except json.JSONDecodeError:
                 continue
   

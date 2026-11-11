@@ -12,6 +12,13 @@ class ConnectionManager:
     def can_send_message(self, user_id: int) -> bool:
         current_time = time.monotonic()
 
+        # Supprimer les anciennes entrées après 60 secondes
+                
+        for uid, timestamp in list(self.last_message_times.items()):
+            if current_time - timestamp > 60:
+                self.last_message_times.pop(uid, None)
+
+
         last_time = self.last_message_times.get(user_id, 0)
 
         if current_time - last_time < 1:
