@@ -1,13 +1,27 @@
 from fastapi import WebSocket
 from database import SessionLocal
 from models import Message
-
+import time
 
 class ConnectionManager:
 
     def __init__(self):
         self.connections = {}
+        self.last_message_times = {}
 
+    def can_send_message(self, user_id: int) -> bool:
+        current_time = time.monotonic()
+
+        last_time = self.last_message_times.get(user_id, 0)
+
+        if current_time - last_time < 1:
+            return False
+
+        self.last_message_times[user_id] = current_time
+
+        return True
+
+        
     async def connect(self, websocket: WebSocket, group_id: int):
         await websocket.accept()
 

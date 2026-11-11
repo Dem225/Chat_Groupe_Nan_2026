@@ -9,7 +9,7 @@ from service import auth_service, group_service, chat_service
 
 import os
 from dotenv import load_dotenv
-
+import time
 
 
 
@@ -88,7 +88,7 @@ async def websocket_chat(
         websocket,
         group_id,
     )
-
+    
     try:
         while True:
 
@@ -99,14 +99,29 @@ async def websocket_chat(
 
             except json.JSONDecodeError:
                 continue
+  
+            if not isinstance(data, dict):
+                continue
 
-            content = str(
-                data.get("content", "")
-            ).strip()[:4000]
+            raw_content = data.get("content", "")
+
+            if not isinstance(raw_content, str):
+                continue
+
+            if len(raw_content) > 4000:
+                continue
+
+            content = raw_content.strip()
 
             if not content:
                 continue
 
+            current_time = time.monotonic()
+
+            if not chat_service.manager.can_send_message(user_id):
+                continue
+
+            
             # Enregistrer le message
             message = await chat_service.save_message(
                 group_id,
